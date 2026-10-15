@@ -1,0 +1,23 @@
+{
+  "origem": "Contas a pagar.xlsx - aba Gastos Fixos (cadastro de recorrentes, não é histórico)",
+  "obs": "Nomes iguais aos de contas-2026-10.json representam a mesma conta. Parcelas do Carro seguem a aba CONTAS (14/60), que é a mais recente.",
+  "recorrentes": [
+    { "conta": "Prime", "categoria": "Streaming", "valor": 13.90, "forma_pagamento": "Crédito", "parcelas_pagas": 5, "parcelas_totais": 12, "ativo": false },
+    { "conta": "HBO Max", "categoria": "Streaming", "valor": 44.90, "dia_vencimento": 15, "forma_pagamento": "Crédito", "parcelas_pagas": 2, "parcelas_totais": 12, "ativo": true },
+    { "conta": "Disney Plus", "categoria": "Streaming", "valor": 46.82, "forma_pagamento": "Crédito", "ativo": false },
+    { "conta": "Netflix", "categoria": "Streaming", "valor": 59.90, "dia_vencimento": 2, "forma_pagamento": "Crédito", "ativo": false },
+    { "conta": "Spotify", "categoria": "Streaming", "valor": 27.90, "dia_vencimento": 6, "forma_pagamento": "Crédito", "ativo": true },
+    { "conta": "Youtube", "categoria": "Streaming", "valor": 26.90, "dia_vencimento": 12, "forma_pagamento": "Crédito", "ativo": true },
+    { "conta": "Seguro Youse", "categoria": "Seguro", "valor": 250.38, "dia_vencimento": 8, "forma_pagamento": "Crédito", "ativo": true },
+    { "conta": "Meli +", "categoria": "Serviços", "valor": 8.90, "forma_pagamento": "Crédito", "ativo": true },
+    { "conta": "iCloud", "categoria": "Serviços", "valor": 19.90, "dia_vencimento": 6, "forma_pagamento": "Crédito", "ativo": true },
+    { "conta": "iFood", "categoria": "Serviços", "valor": 5.95, "dia_vencimento": 24, "forma_pagamento": "Crédito", "ativo": false },
+    { "conta": "FIES", "categoria": "Financiamento", "valor": 258.29, "dia_vencimento": 11, "forma_pagamento": "Boleto", "parcelas_pagas": 111, "parcelas_totais": 177, "ativo": true },
+    { "conta": "Carro", "categoria": "Financiamento", "valor": 1599.43, "dia_vencimento": 7, "forma_pagamento": "Débito automático (Itaú)", "parcelas_pagas": 14, "parcelas_totais": 60, "ativo": true },
+    { "conta": "Apartamento", "categoria": "Financiamento", "valor": 3000.00, "dia_vencimento": 10, "forma_pagamento": "Boleto", "tipo_valor": "variavel", "origem_valor": "juros_obra", "obs": "Na planilha: 'Apto Novo'. 3.000 é estimativa; valor real vem dos juros de obra", "ativo": true },
+    { "conta": "Aluguel", "categoria": "Moradia", "valor": 850.00, "dia_vencimento": 10, "forma_pagamento": "Boleto", "ativo": true },
+    { "conta": "Condomínio", "categoria": "Moradia", "valor": 381.27, "dia_vencimento": 12, "forma_pagamento": "Boleto", "ativo": true },
+    { "conta": "Internet", "categoria": "Serviços", "valor": 118.00, "dia_vencimento": 12, "forma_pagamento": "Boleto", "ativo": true },
+    { "conta": "Energia (CPFL)", "categoria": "Moradia", "valor": 250.00, "dia_vencimento": 20, "forma_pagamento": "Boleto", "tipo_valor": "variavel", "obs": "250 é a média usada na planilha", "ativo": true }
+  ]
+}
