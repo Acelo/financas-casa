@@ -74,6 +74,15 @@ export async function excluirLancamento(id: string) {
   return {};
 }
 
+export async function excluirLancamentos(ids: string[]): Promise<Resultado> {
+  if (!ids.length) return {};
+  const supabase = await createClient();
+  const { error } = await supabase.from("lancamentos").delete().in("id", ids);
+  if (error) return { erro: error.message };
+  refresh();
+  return { ok: `${ids.length} conta(s) removida(s) do mês.` };
+}
+
 export async function gerarMes(mes: string): Promise<Resultado> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("gerar_lancamentos", {

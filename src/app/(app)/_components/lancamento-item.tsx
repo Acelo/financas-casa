@@ -30,7 +30,15 @@ export type LancamentoView = {
 const campo =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-base outline-none focus:border-accent";
 
-export function LancamentoItem({ l }: { l: LancamentoView }) {
+type Selecao = { ativo: boolean; marcado: boolean; alternar: () => void };
+
+export function LancamentoItem({
+  l,
+  selecao,
+}: {
+  l: LancamentoView;
+  selecao: Selecao;
+}) {
   const [aberto, setAberto] = useState(false);
   const [pendente, startTransition] = useTransition();
   const [state, action, salvando] = useActionState<Resultado, FormData>(
@@ -49,11 +57,20 @@ export function LancamentoItem({ l }: { l: LancamentoView }) {
       : 0;
 
   return (
-    <li className={pendente ? "opacity-60" : ""}>
+    <li className={`${pendente ? "opacity-60" : ""} ${selecao.marcado ? "bg-accent/10" : ""}`}>
       <div className="flex items-center gap-3 px-4 py-3">
+        {selecao.ativo && (
+          <input
+            type="checkbox"
+            checked={selecao.marcado}
+            onChange={selecao.alternar}
+            aria-label={`Selecionar ${l.contas.nome}`}
+            className="size-5 shrink-0 accent-[var(--accent)]"
+          />
+        )}
         <button
           type="button"
-          onClick={() => setAberto((a) => !a)}
+          onClick={() => (selecao.ativo ? selecao.alternar() : setAberto((a) => !a))}
           className="min-w-0 flex-1 text-left"
         >
           <p className="truncate font-medium">{l.contas.nome}</p>
@@ -76,8 +93,10 @@ export function LancamentoItem({ l }: { l: LancamentoView }) {
           )}
         </div>
 
-        {pago ? (
-          <span className="w-20 text-center text-xs font-medium text-positive">Pago</span>
+        {pago || selecao.ativo ? (
+          <span className={`w-20 text-center text-xs font-medium ${pago ? "text-positive" : "text-negative"}`}>
+            {pago ? "Pago" : "Pendente"}
+          </span>
         ) : (
           <button
             type="button"
@@ -90,7 +109,7 @@ export function LancamentoItem({ l }: { l: LancamentoView }) {
         )}
       </div>
 
-      {aberto && (
+      {aberto && !selecao.ativo && (
         <form action={action} className="grid gap-3 border-t border-border bg-background/60 px-4 py-4 sm:grid-cols-2">
           <input type="hidden" name="id" value={l.id} />
 

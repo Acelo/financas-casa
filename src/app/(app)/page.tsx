@@ -3,10 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { competenciaParaData, formatBRL, lerMes } from "@/lib/format";
 import { AcoesMes } from "./_components/acoes-mes";
 import { MesNav, Resumo } from "./_components/mes-nav";
-import {
-  LancamentoItem,
-  type LancamentoView,
-} from "./_components/lancamento-item";
+import type { LancamentoView } from "./_components/lancamento-item";
+import { ListaLancamentos } from "./_components/lista-lancamentos";
 
 export default function ContasDoMes({ searchParams }: PageProps<"/">) {
   return (
@@ -74,11 +72,7 @@ async function Conteudo({
           trazer as contas recorrentes.
         </p>
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
-          {lancamentos.map((l) => (
-            <LancamentoItem key={l.id} l={l} />
-          ))}
-        </ul>
+        <ListaLancamentos key={mes} lancamentos={lancamentos} />
       )}
     </div>
   );
