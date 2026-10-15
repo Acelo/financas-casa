@@ -1,22 +1,9 @@
-import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { competenciaParaData, formatBRL, lerMes } from "@/lib/format";
 import { MesNav, Resumo } from "../_components/mes-nav";
 import { NovaReceita, ReceitaItem, type ReceitaView } from "./receita-form";
 
-export default function Receitas({ searchParams }: PageProps<"/receitas">) {
-  return (
-    <Suspense fallback={<p className="text-sm text-muted">Carregando...</p>}>
-      <Conteudo searchParams={searchParams} />
-    </Suspense>
-  );
-}
-
-async function Conteudo({
-  searchParams,
-}: {
-  searchParams: PageProps<"/receitas">["searchParams"];
-}) {
+export default async function Receitas({ searchParams }: PageProps<"/receitas">) {
   const mes = lerMes((await searchParams).mes);
   const competencia = competenciaParaData(mes);
   const supabase = await createClient();

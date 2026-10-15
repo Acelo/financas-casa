@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { competenciaParaData, formatBRL, lerMes } from "@/lib/format";
 import { AcoesMes } from "./_components/acoes-mes";
@@ -6,19 +5,7 @@ import { MesNav, Resumo } from "./_components/mes-nav";
 import type { LancamentoView } from "./_components/lancamento-item";
 import { ListaLancamentos } from "./_components/lista-lancamentos";
 
-export default function ContasDoMes({ searchParams }: PageProps<"/">) {
-  return (
-    <Suspense fallback={<p className="text-sm text-muted">Carregando...</p>}>
-      <Conteudo searchParams={searchParams} />
-    </Suspense>
-  );
-}
-
-async function Conteudo({
-  searchParams,
-}: {
-  searchParams: PageProps<"/">["searchParams"];
-}) {
+export default async function ContasDoMes({ searchParams }: PageProps<"/">) {
   const mes = lerMes((await searchParams).mes);
 
   const supabase = await createClient();
@@ -64,7 +51,7 @@ async function Conteudo({
         />
       </div>
 
-      {/* Chaves distintas: irmãos com a mesma key confundem o React ao trocar de mês */}
+      {/* key por mês: zera o estado (mensagens, formulário aberto) ao trocar de mês */}
       <AcoesMes key={`acoes-${mes}`} mes={mes} />
 
       {lancamentos.length === 0 && !error ? (
