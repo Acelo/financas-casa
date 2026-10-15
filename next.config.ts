@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
   // tudo a cada requisição é o modelo certo para este app.
   cacheComponents: false,
   partialPrefetching: false,
+  experimental: {
+    // Abas vizinhas são pré-carregadas (router.prefetch) para o deslizar ser
+    // instantâneo. 60s em vez de 5min: o que a outra pessoa alterar em outro
+    // aparelho aparece rápido. Alterações feitas aqui já limpam o cache.
+    staleTimes: { static: 60 },
+  },
   turbopack: {
     rules: {
       "*.css": {

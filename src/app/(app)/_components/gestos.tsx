@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { itens } from "./menu";
 
@@ -14,6 +14,23 @@ import { itens } from "./menu";
 const PUXAR_LIMITE = 70; // px puxados para recarregar
 const DESLIZAR_MIN = 70; // px na horizontal para trocar de aba
 const BORDA = 24; // ignora toques colados na borda (gesto de voltar do iOS)
+
+const SAIDA_MS = 150;
+const ENTRADA_MS = 220;
+
+function semAnimacao() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function indiceDe(p: string) {
+  return itens.findIndex((i) => (i.href === "/" ? p === "/" : p.startsWith(i.href)));
+}
+
+// Contas e Receitas compartilham o mês escolhido
+function hrefCom(href: string) {
+  const mes = new URLSearchParams(window.location.search).get("mes");
+  return mes && (href === "/" || href === "/receitas") ? `${href}?mes=${mes}` : href;
+}
 
 function ehMobile() {
   return window.matchMedia("(max-width: 767px)").matches;
@@ -49,17 +66,58 @@ export function Gestos({ children }: { children: React.ReactNode }) {
   const [deslize, setDeslize] = useState<{ dx: number; destino: string | null } | null>(null);
   const [indo, setIndo] = useState<string | null>(null);
   const conteudo = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  // Sentido da troca em andamento: 1 = próxima aba, -1 = anterior
+  const sentido = useRef<1 | -1 | 0>(0);
+  const saida = useRef<Animation | null>(null);
+  const caminhoAnterior = useRef(pathname);
+
+  // Pré-carrega as abas vizinhas: ao deslizar a tela já está pronta
+  useEffect(() => {
+    const i = indiceDe(pathname);
+    if (i < 0) return;
+    for (const j of [i - 1, i + 1]) {
+      if (itens[j]) router.prefetch(hrefCom(itens[j].href));
+    }
+  }, [pathname, router]);
+
+  // Nova aba chegou: ela entra pelo lado de onde veio o gesto (ou, num
+  // toque no menu, pelo lado da posição dela na barra)
+  useEffect(() => {
+    const anterior = caminhoAnterior.current;
+    caminhoAnterior.current = pathname;
+    const el = conteudo.current;
+    if (!el || anterior === pathname) return;
+
+    let s = sentido.current;
+    sentido.current = 0;
+    if (!s) {
+      const de = indiceDe(anterior);
+      const para = indiceDe(pathname);
+      s = de >= 0 && para >= 0 && de !== para ? (para > de ? 1 : -1) : 0;
+    }
+    saida.current?.cancel();
+    saida.current = null;
+    el.style.transition = "none";
+    el.style.transform = "";
+    if (!s || semAnimacao() || !ehMobile()) return;
+
+    el.animate(
+      [
+        { transform: `translateX(${s * 30}%)`, opacity: 0 },
+        { transform: "translateX(0)", opacity: 1 },
+      ],
+      { duration: ENTRADA_MS, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+    );
+  }, [pathname]);
 
   useEffect(() => {
     let x0 = 0;
     let y0 = 0;
     let modo: "nada" | "puxar" | "deslizar" | "indefinido" = "nada";
 
-    const indice = () => {
-      // Lido na hora do gesto: a URL atual já reflete a última navegação
-      const p = window.location.pathname;
-      return itens.findIndex((i) => (i.href === "/" ? p === "/" : p.startsWith(i.href)));
-    };
+    // Lido na hora do gesto: a URL atual já reflete a última navegação
+    const indice = () => indiceDe(window.location.pathname);
 
     const mover = (dx: number) => {
       if (conteudo.current) {
@@ -121,18 +179,41 @@ export function Gestos({ children }: { children: React.ReactNode }) {
       const dy = t.clientY - y0;
 
       if (modo === "deslizar") {
-        soltar();
         setDeslize(null);
-        if (Math.abs(dx) >= DESLIZAR_MIN && Math.abs(dx) > Math.abs(dy) * 1.5) {
-          const i = indice();
-          const destino = itens[dx < 0 ? i + 1 : i - 1];
-          if (i >= 0 && destino) {
-            // Contas e Receitas compartilham o mês escolhido
-            const mes = new URLSearchParams(window.location.search).get("mes");
-            const levaMes = mes && (destino.href === "/" || destino.href === "/receitas");
-            setIndo(destino.curto);
-            startTroca(() => router.push(levaMes ? `${destino.href}?mes=${mes}` : destino.href));
+        const i = indice();
+        const destino =
+          Math.abs(dx) >= DESLIZAR_MIN && Math.abs(dx) > Math.abs(dy) * 1.5 && i >= 0
+            ? itens[dx < 0 ? i + 1 : i - 1]
+            : undefined;
+        if (!destino) {
+          soltar();
+        } else {
+          const s = dx < 0 ? 1 : -1;
+          sentido.current = s;
+          const el = conteudo.current;
+          if (el && !semAnimacao()) {
+            const atual = el.style.transform || "translateX(0)";
+            el.style.transition = "none";
+            saida.current = el.animate(
+              [
+                { transform: atual, opacity: 1 },
+                { transform: `translateX(${-s * 30}%)`, opacity: 0 },
+              ],
+              { duration: SAIDA_MS, easing: "ease-in", fill: "forwards" },
+            );
           }
+          // Se a navegação travar, devolve a tela em vez de deixá-la sumida
+          const alvo = destino.href;
+          window.setTimeout(() => {
+            if (indiceDe(window.location.pathname) !== indiceDe(alvo) && saida.current) {
+              saida.current.cancel();
+              saida.current = null;
+              sentido.current = 0;
+              soltar();
+            }
+          }, 6000);
+          setIndo(destino.curto);
+          startTroca(() => router.push(hrefCom(destino.href)));
         }
       } else if (modo === "puxar") {
         if (dy * 0.5 >= PUXAR_LIMITE) {
