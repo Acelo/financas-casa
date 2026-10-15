@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { formatBRL } from "@/lib/format";
+import { valorParaInput } from "@/lib/valores";
 import {
   excluirLancamento,
   marcarPago,
@@ -28,10 +29,6 @@ export type LancamentoView = {
 
 const campo =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-base outline-none focus:border-accent";
-
-function valorParaInput(v: number | null) {
-  return v === null ? "" : Number(v).toFixed(2).replace(".", ",");
-}
 
 export function LancamentoItem({ l }: { l: LancamentoView }) {
   const [aberto, setAberto] = useState(false);

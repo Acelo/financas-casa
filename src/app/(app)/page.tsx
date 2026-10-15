@@ -1,14 +1,8 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import {
-  competenciaParaData,
-  formatBRL,
-  mesAtual,
-  nomeDoMes,
-  somarMeses,
-} from "@/lib/format";
+import { competenciaParaData, formatBRL, lerMes } from "@/lib/format";
 import { AcoesMes } from "./_components/acoes-mes";
+import { MesNav, Resumo } from "./_components/mes-nav";
 import {
   LancamentoItem,
   type LancamentoView,
@@ -27,11 +21,7 @@ async function Conteudo({
 }: {
   searchParams: PageProps<"/">["searchParams"];
 }) {
-  const { mes: mesParam } = await searchParams;
-  const mes =
-    typeof mesParam === "string" && /^\d{4}-\d{2}$/.test(mesParam)
-      ? mesParam
-      : mesAtual();
+  const mes = lerMes((await searchParams).mes);
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -56,15 +46,7 @@ async function Conteudo({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-2">
-        <Link href={`/?mes=${somarMeses(mes, -1)}`} className="rounded-md px-3 py-1 text-xl text-muted hover:bg-surface">
-          ‹
-        </Link>
-        <h1 className="text-lg font-semibold">{nomeDoMes(mes)}</h1>
-        <Link href={`/?mes=${somarMeses(mes, 1)}`} className="rounded-md px-3 py-1 text-xl text-muted hover:bg-surface">
-          ›
-        </Link>
-      </div>
+      <MesNav mes={mes} base="/" />
 
       {error && (
         <p className="rounded-lg border border-negative/40 p-3 text-sm text-negative">
@@ -74,12 +56,12 @@ async function Conteudo({
 
       {/* No celular: Previsto e Pago lado a lado, Falta pagar embaixo inteiro */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <Resumo titulo="Previsto" valor={totalPrevisto} />
-        <Resumo titulo="Pago" valor={totalPago} />
+        <Resumo titulo="Previsto" valor={formatBRL(totalPrevisto)} />
+        <Resumo titulo="Pago" valor={formatBRL(totalPago)} />
         <Resumo
           titulo="Falta pagar"
-          valor={faltaPagar}
-          destaque={faltaPagar > 0}
+          valor={formatBRL(faltaPagar)}
+          cor={faltaPagar > 0 ? "negativo" : undefined}
           className="col-span-2 sm:col-span-1"
         />
       </div>
@@ -98,27 +80,6 @@ async function Conteudo({
           ))}
         </ul>
       )}
-    </div>
-  );
-}
-
-function Resumo({
-  titulo,
-  valor,
-  destaque,
-  className = "",
-}: {
-  titulo: string;
-  valor: number;
-  destaque?: boolean;
-  className?: string;
-}) {
-  return (
-    <div className={`min-w-0 rounded-xl border border-border bg-surface p-3 ${className}`}>
-      <p className="text-xs text-muted">{titulo}</p>
-      <p className={`whitespace-nowrap text-lg font-semibold tabular-nums ${destaque ? "text-negative" : ""}`}>
-        {formatBRL(valor)}
-      </p>
     </div>
   );
 }

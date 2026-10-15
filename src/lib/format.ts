@@ -19,6 +19,13 @@ export function mesAtual() {
     .slice(0, 7);
 }
 
+// Lê ?mes=AAAA-MM da URL; se ausente ou inválido, usa o mês corrente
+export function lerMes(param: string | string[] | undefined) {
+  return typeof param === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(param)
+    ? param
+    : mesAtual();
+}
+
 export function nomeDoMes(mes: string) {
   const [ano, m] = mes.split("-").map(Number);
   const nome = new Date(ano, m - 1, 1).toLocaleDateString("pt-BR", {
