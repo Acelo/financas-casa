@@ -142,7 +142,13 @@ function CartaoReserva({
         </div>
         <div className="text-right">
           <p className="whitespace-nowrap text-xl font-semibold">{formatBRL(e?.estimado ?? r.registrado)}</p>
-          <p className="text-xs text-muted">{e ? "estimado hoje" : "saldo"}</p>
+          <p className="text-xs text-muted">{e ? "bruto estimado hoje" : "saldo"}</p>
+          {e && (
+            <p className="mt-1 whitespace-nowrap text-sm">
+              <span className="font-medium">{formatBRL(e.liquido)}</span>{" "}
+              <span className="text-xs text-muted">líquido</span>
+            </p>
+          )}
         </div>
       </div>
 
@@ -154,7 +160,9 @@ function CartaoReserva({
             {formatBRL(e.rendimento)}
           </span>{" "}
           de rendimento estimado desde {dataBR(e.desde)}
-          {e.taxaAte && ` (CDI até ${dataBR(e.taxaAte)})`}. Valor bruto, antes de IR.
+          {e.taxaAte && ` (CDI até ${dataBR(e.taxaAte)})`}. Se resgatasse tudo hoje: IR/IOF de{" "}
+          {formatBRL(e.impostos)}, líquido de {formatBRL(e.liquido)}.
+          {!e.baseInformada && " Informe o saldo líquido ao atualizar o saldo para o cálculo ficar mais preciso."}
         </p>
       )}
 
@@ -317,6 +325,17 @@ function FormMovimento({
           className={campo}
         />
       </label>
+      {tipo === "saldo_inicial" && (
+        <label className="space-y-1">
+          <span className="text-xs text-muted">Saldo líquido (opcional)</span>
+          <input
+            name="saldo_liquido"
+            inputMode="decimal"
+            defaultValue={movimento?.valor_liquido != null ? valorParaInput(movimento.valor_liquido) : ""}
+            className={campo}
+          />
+        </label>
+      )}
       {state.erro && <p className="text-sm text-negative sm:col-span-full">{state.erro}</p>}
       <Acoes salvando={salvando} aoCancelar={aoTerminar} rotulo={movimento ? "Salvar" : tipo === "resgate" ? "Registrar resgate" : "Registrar aporte"} />
     </form>
@@ -330,10 +349,10 @@ function FormAtualizar({ r, hoje, aoTerminar }: { r: ReservaView; hoje: string; 
     <form action={action} className="grid gap-3 sm:grid-cols-3">
       <input type="hidden" name="reserva_id" value={r.id} />
       <p className="text-sm text-muted sm:col-span-full">
-        Digite o saldo que aparece no app do banco. A diferença para o registrado ({formatBRL(r.registrado)}) entra como rendimento.
+        Digite os saldos que aparecem no app do banco. A diferença do bruto para o registrado ({formatBRL(r.registrado)}) entra como rendimento; o líquido deixa o cálculo do imposto exato.
       </p>
       <label className="space-y-1">
-        <span className="text-xs text-muted">Saldo no banco</span>
+        <span className="text-xs text-muted">Saldo bruto no banco</span>
         <input
           name="saldo_real"
           required
@@ -341,6 +360,10 @@ function FormAtualizar({ r, hoje, aoTerminar }: { r: ReservaView; hoje: string; 
           defaultValue={r.estimativa ? valorParaInput(r.estimativa.estimado) : ""}
           className={campo}
         />
+      </label>
+      <label className="space-y-1">
+        <span className="text-xs text-muted">Saldo líquido no banco (opcional)</span>
+        <input name="saldo_liquido" inputMode="decimal" className={campo} />
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Data</span>
@@ -394,8 +417,12 @@ function FormReserva({ reserva, hoje, aoTerminar }: { reserva?: ReservaView; hoj
       {!reserva && (
         <>
           <label className="space-y-1">
-            <span className="text-xs text-muted">Saldo atual</span>
+            <span className="text-xs text-muted">Saldo bruto atual</span>
             <input name="saldo_inicial" required inputMode="decimal" placeholder="0,00" className={campo} />
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs text-muted">Saldo líquido (opcional)</span>
+            <input name="saldo_liquido" inputMode="decimal" placeholder="0,00" className={campo} />
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Saldo na data</span>

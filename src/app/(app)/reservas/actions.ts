@@ -13,6 +13,15 @@ function lerData(texto: FormDataEntryValue | null) {
   return DATA_RE.test(s) ? s : hoje();
 }
 
+// Saldo líquido opcional (o que o banco mostra depois de IR/IOF)
+function lerLiquido(texto: FormDataEntryValue | null, bruto: number) {
+  const v = lerValor(texto);
+  if (v === null) return { valor: null };
+  if (Number.isNaN(v)) return { erro: "Saldo líquido inválido." };
+  if (v > bruto) return { erro: "O líquido não pode ser maior que o bruto." };
+  return { valor: v };
+}
+
 // Cria (sem id, com saldo inicial) ou edita uma caixinha
 export async function salvarReserva(
   _prev: Resultado,
@@ -47,6 +56,9 @@ export async function salvarReserva(
     if (saldo === null || Number.isNaN(saldo) || saldo <= 0) {
       return { erro: "Informe o saldo atual da caixinha." };
     }
+    const liquido = lerLiquido(formData.get("saldo_liquido"), saldo);
+    if (liquido.erro) return { erro: liquido.erro };
+
     const { data: nova, error } = await supabase.from("reservas").insert(dados).select("id").single();
     if (error) return { erro: traduzir(error) };
 
@@ -56,6 +68,7 @@ export async function salvarReserva(
       valor: saldo,
       data: lerData(formData.get("data")),
       descricao: "Saldo inicial",
+      valor_liquido: liquido.valor,
     });
     if (e2) return { erro: e2.message };
   }
@@ -79,11 +92,15 @@ export async function salvarMovimento(
   }
   if (valor === null || Number.isNaN(valor) || valor === 0) return { erro: "Informe o valor." };
 
+  const liquido = tipo === "saldo_inicial" ? lerLiquido(formData.get("saldo_liquido"), valor) : { valor: null };
+  if (liquido.erro) return { erro: liquido.erro };
+
   const dados = {
     tipo,
     valor,
     data: lerData(formData.get("data")),
     descricao: String(formData.get("descricao") ?? "").trim() || null,
+    ...(tipo === "saldo_inicial" ? { valor_liquido: liquido.valor } : {}),
   };
 
   const supabase = await createClient();
@@ -105,18 +122,35 @@ export async function atualizarSaldo(
   const real = lerValor(formData.get("saldo_real"));
   const data = lerData(formData.get("data"));
 
-  if (real === null || Number.isNaN(real)) return { erro: "Informe o saldo que aparece no banco." };
+  if (real === null || Number.isNaN(real)) return { erro: "Informe o saldo bruto que aparece no banco." };
+  const liquido = lerLiquido(formData.get("saldo_liquido"), real);
+  if (liquido.erro) return { erro: liquido.erro };
 
   const supabase = await createClient();
   const { data: movs, error } = await supabase
     .from("reserva_movimentos")
-    .select("id, reserva_id, data, tipo, valor, descricao")
+    .select("id, reserva_id, data, tipo, valor, descricao, valor_liquido")
     .eq("reserva_id", reservaId)
     .returns<Movimento[]>();
   if (error) return { erro: error.message };
 
   const diferenca = Math.round((real - saldoRegistrado(movs ?? [], data)) * 100) / 100;
-  if (Math.abs(diferenca) < 0.01) return { ok: "O saldo já confere com o registrado." };
+  if (Math.abs(diferenca) < 0.01) {
+    // Bruto já confere: só guarda o líquido informado na última âncora
+    if (liquido.valor === null) return { ok: "O saldo já confere com o registrado." };
+    const ancora = (movs ?? [])
+      .filter((m) => (m.tipo === "saldo_inicial" || m.tipo === "rendimento") && m.data <= data)
+      .sort((a, b) => a.data.localeCompare(b.data))
+      .at(-1);
+    if (!ancora) return { erro: "Caixinha sem saldo inicial." };
+    const { error: e3 } = await supabase
+      .from("reserva_movimentos")
+      .update({ valor_liquido: liquido.valor })
+      .eq("id", ancora.id);
+    if (e3) return { erro: e3.message };
+    refresh();
+    return { ok: "Bruto já conferia; saldo líquido atualizado." };
+  }
 
   const { error: e2 } = await supabase.from("reserva_movimentos").insert({
     reserva_id: reservaId,
@@ -124,6 +158,7 @@ export async function atualizarSaldo(
     valor: diferenca,
     data,
     descricao: "Atualização de saldo",
+    valor_liquido: liquido.valor,
   });
   if (e2) return { erro: e2.message };
 

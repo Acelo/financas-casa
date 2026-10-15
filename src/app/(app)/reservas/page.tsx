@@ -30,7 +30,7 @@ export default async function Reservas({ searchParams }: PageProps<"/reservas">)
     supabase.from("reservas").select("id, nome, indexador, taxa, ativo, obs").order("nome").returns<ReservaBanco[]>(),
     supabase
       .from("reserva_movimentos")
-      .select("id, reserva_id, data, tipo, valor, descricao")
+      .select("id, reserva_id, data, tipo, valor, descricao, valor_liquido")
       .order("data", { ascending: false })
       .order("created_at", { ascending: false })
       .returns<Movimento[]>(),
@@ -59,8 +59,9 @@ export default async function Reservas({ searchParams }: PageProps<"/reservas">)
   });
 
   const ativas = reservas.filter((r) => r.ativo);
-  const totalRegistrado = ativas.reduce((s, r) => s + r.registrado, 0);
   const totalEstimado = ativas.reduce((s, r) => s + (r.estimativa?.estimado ?? r.registrado), 0);
+  // Sem rendimento (ou sem CDI), líquido = registrado
+  const totalLiquido = ativas.reduce((s, r) => s + (r.estimativa?.liquido ?? r.registrado), 0);
   const doAno = movs.filter((m) => m.data.startsWith(ano));
   const soma = (tipo: Movimento["tipo"]) =>
     doAno.filter((m) => m.tipo === tipo).reduce((s, m) => s + Number(m.valor), 0);
@@ -80,8 +81,8 @@ export default async function Reservas({ searchParams }: PageProps<"/reservas">)
       )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Resumo titulo="Saldo estimado hoje" valor={formatBRL(totalEstimado)} />
-        <Resumo titulo="Saldo registrado" valor={formatBRL(totalRegistrado)} />
+        <Resumo titulo="Saldo bruto estimado" valor={formatBRL(totalEstimado)} />
+        <Resumo titulo="Líquido estimado (se resgatar)" valor={formatBRL(totalLiquido)} />
         <Resumo titulo={`Rendimento em ${ano}`} valor={formatBRL(rendimentoAno)} cor="positivo" />
         <Resumo titulo={`Aportes − resgates em ${ano}`} valor={formatBRL(soma("aporte") - soma("resgate"))} />
       </div>
