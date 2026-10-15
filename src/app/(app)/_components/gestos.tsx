@@ -43,7 +43,11 @@ function bloqueado(alvo: EventTarget | null) {
 export function Gestos({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [recarregando, startTransition] = useTransition();
+  const [trocando, startTroca] = useTransition();
   const [puxado, setPuxado] = useState(0);
+  // Deslize em andamento: quanto andou e para qual aba vai (null = não há)
+  const [deslize, setDeslize] = useState<{ dx: number; destino: string | null } | null>(null);
+  const [indo, setIndo] = useState<string | null>(null);
   const conteudo = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -98,8 +102,9 @@ export function Gestos({ children }: { children: React.ReactNode }) {
       if (modo === "deslizar") {
         e.preventDefault(); // não rolar a página enquanto desliza
         const i = indice();
-        const temDestino = (dx < 0 && i < itens.length - 1) || (dx > 0 && i > 0);
-        mover(temDestino ? dx : dx * 0.25);
+        const destino = i >= 0 ? itens[dx < 0 ? i + 1 : i - 1] : undefined;
+        mover(destino ? dx : dx * 0.25);
+        setDeslize({ dx, destino: destino?.curto ?? null });
       } else if (modo === "puxar") {
         if (window.scrollY > 0 || dy <= 0) {
           setPuxado(0);
@@ -117,6 +122,7 @@ export function Gestos({ children }: { children: React.ReactNode }) {
 
       if (modo === "deslizar") {
         soltar();
+        setDeslize(null);
         if (Math.abs(dx) >= DESLIZAR_MIN && Math.abs(dx) > Math.abs(dy) * 1.5) {
           const i = indice();
           const destino = itens[dx < 0 ? i + 1 : i - 1];
@@ -124,7 +130,8 @@ export function Gestos({ children }: { children: React.ReactNode }) {
             // Contas e Receitas compartilham o mês escolhido
             const mes = new URLSearchParams(window.location.search).get("mes");
             const levaMes = mes && (destino.href === "/" || destino.href === "/receitas");
-            router.push(levaMes ? `${destino.href}?mes=${mes}` : destino.href);
+            setIndo(destino.curto);
+            startTroca(() => router.push(levaMes ? `${destino.href}?mes=${mes}` : destino.href));
           }
         }
       } else if (modo === "puxar") {
@@ -148,8 +155,21 @@ export function Gestos({ children }: { children: React.ReactNode }) {
     };
   }, [router]);
 
-  const visivel = recarregando || puxado > 0;
+  const visivel = recarregando || puxado > 0 || trocando;
   const pronto = puxado >= PUXAR_LIMITE;
+  const texto = trocando
+    ? `Abrindo ${indo ?? ""}...`
+    : recarregando
+      ? "Atualizando..."
+      : pronto
+        ? "Solte para atualizar"
+        : "Puxe para atualizar";
+  const girando = recarregando || trocando;
+
+  // Indicador lateral: aparece do lado de onde a próxima aba "entra"
+  const progresso = deslize ? Math.min(Math.abs(deslize.dx) / DESLIZAR_MIN, 1) : 0;
+  const ladoDireito = deslize ? deslize.dx < 0 : false;
+  const vaiTrocar = deslize?.destino != null && progresso >= 1;
 
   return (
     <>
@@ -157,15 +177,41 @@ export function Gestos({ children }: { children: React.ReactNode }) {
         <div
           aria-live="polite"
           className="pointer-events-none fixed inset-x-0 top-[env(safe-area-inset-top)] z-20 flex justify-center"
-          style={{ transform: `translateY(${recarregando ? 56 : puxado}px)` }}
+          style={{ transform: `translateY(${girando ? 56 : puxado}px)` }}
         >
           <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted shadow">
             <span
-              className={`inline-block size-3.5 rounded-full border-2 border-accent border-t-transparent ${recarregando ? "animate-spin" : ""}`}
-              style={recarregando ? undefined : { transform: `rotate(${puxado * 4}deg)` }}
+              className={`inline-block size-3.5 rounded-full border-2 border-accent border-t-transparent ${girando ? "animate-spin" : ""}`}
+              style={girando ? undefined : { transform: `rotate(${puxado * 4}deg)` }}
             />
-            {recarregando ? "Atualizando..." : pronto ? "Solte para atualizar" : "Puxe para atualizar"}
+            {texto}
           </div>
+        </div>
+      )}
+      {deslize && Math.abs(deslize.dx) > 12 && (
+        <div
+          aria-live="polite"
+          className={`pointer-events-none fixed top-1/2 z-20 -translate-y-1/2 ${ladoDireito ? "right-2" : "left-2"}`}
+          style={{ opacity: 0.35 + progresso * 0.65 }}
+        >
+          <div
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm shadow-lg transition-colors ${
+              vaiTrocar
+                ? "border-accent bg-accent text-white"
+                : "border-border bg-surface text-muted"
+            }`}
+          >
+            {!ladoDireito && <span aria-hidden>‹</span>}
+            <span className="font-medium">
+              {deslize.destino ?? (ladoDireito ? "Última aba" : "Primeira aba")}
+            </span>
+            {ladoDireito && <span aria-hidden>›</span>}
+          </div>
+          {deslize.destino && (
+            <div className="mx-auto mt-1.5 h-1 w-12 overflow-hidden rounded-full bg-border">
+              <div className="h-full rounded-full bg-accent" style={{ width: `${progresso * 100}%` }} />
+            </div>
+          )}
         </div>
       )}
       <div ref={conteudo}>{children}</div>
