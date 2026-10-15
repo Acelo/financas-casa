@@ -69,7 +69,7 @@ export function LancamentoItem({ l }: { l: LancamentoView }) {
         </button>
 
         <div className="text-right">
-          <p className="font-mono tabular-nums">
+          <p className="whitespace-nowrap font-medium tabular-nums">
             {formatBRL(l.valor_pago ?? l.valor_previsto)}
           </p>
           {Math.abs(diferenca) >= 0.01 && (

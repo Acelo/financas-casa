@@ -72,10 +72,16 @@ async function Conteudo({
         </p>
       )}
 
-      <div className="grid grid-cols-3 gap-3">
+      {/* No celular: Previsto e Pago lado a lado, Falta pagar embaixo inteiro */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Resumo titulo="Previsto" valor={totalPrevisto} />
         <Resumo titulo="Pago" valor={totalPago} />
-        <Resumo titulo="Falta pagar" valor={faltaPagar} destaque={faltaPagar > 0} />
+        <Resumo
+          titulo="Falta pagar"
+          valor={faltaPagar}
+          destaque={faltaPagar > 0}
+          className="col-span-2 sm:col-span-1"
+        />
       </div>
 
       <AcoesMes key={mes} mes={mes} />
@@ -100,15 +106,17 @@ function Resumo({
   titulo,
   valor,
   destaque,
+  className = "",
 }: {
   titulo: string;
   valor: number;
   destaque?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-3">
+    <div className={`min-w-0 rounded-xl border border-border bg-surface p-3 ${className}`}>
       <p className="text-xs text-muted">{titulo}</p>
-      <p className={`font-mono text-sm tabular-nums sm:text-lg ${destaque ? "text-negative" : ""}`}>
+      <p className={`whitespace-nowrap text-lg font-semibold tabular-nums ${destaque ? "text-negative" : ""}`}>
         {formatBRL(valor)}
       </p>
     </div>
