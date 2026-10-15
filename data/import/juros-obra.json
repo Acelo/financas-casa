@@ -1,0 +1,13 @@
+{
+  "origem": "Contas a pagar.xlsx - aba Juros de Obra Financ (pagamento todo dia 10)",
+  "registros": [
+    { "competencia": "2026-03", "valor": 1818.18 },
+    { "competencia": "2026-04", "valor": 1292.52 },
+    { "competencia": "2026-05", "valor": 1654.41 },
+    { "competencia": "2026-06", "valor": 2026.14 },
+    { "competencia": "2026-07", "valor": 2029.32 },
+    { "competencia": "2026-08", "valor": 2342.94 },
+    { "competencia": "2026-09", "valor": 2247.74 },
+    { "competencia": "2026-10", "valor": 2533.12 }
+  ]
+}

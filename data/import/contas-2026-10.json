@@ -1,0 +1,25 @@
+{
+  "origem": "Contas a pagar.xlsx - aba CONTAS, coluna F",
+  "competencia": "2026-10",
+  "lancamentos": [
+    { "conta": "Apartamento", "categoria": "Financiamento", "valor": 2533.12, "dia_vencimento": 10, "origem_valor": "juros_obra" },
+    { "conta": "Aluguel", "categoria": "Moradia", "valor": 850.00, "dia_vencimento": 10 },
+    { "conta": "Condomínio", "categoria": "Moradia", "valor": 381.27, "dia_vencimento": 12 },
+    { "conta": "Carro", "categoria": "Financiamento", "valor": 1599.43, "dia_vencimento": 7, "forma_pagamento": "Débito automático (Itaú)", "parcela": 14, "parcelas_totais": 60 },
+    { "conta": "Cartão NU Tulio", "categoria": "Cartão", "valor": 1578.55, "dia_vencimento": 9 },
+    { "conta": "Cartão C6", "categoria": "Cartão", "valor": 5326.04, "dia_vencimento": 10 },
+    { "conta": "Cartão NU Letícia", "categoria": "Cartão", "valor": 30.72, "dia_vencimento": 12 },
+    { "conta": "Cartão Carre4", "categoria": "Cartão", "valor": 0.00, "dia_vencimento": 8 },
+    { "conta": "Cartão Saveg", "categoria": "Cartão", "valor": 0.00, "dia_vencimento": 10, "obs": "Vem zerado caso não faça compras" },
+    { "conta": "Cartão Ponto (Let)", "categoria": "Cartão", "valor": 15.00, "dia_vencimento": 13 },
+    { "conta": "Cartão Ponto (Tul)", "categoria": "Cartão", "valor": 15.00, "dia_vencimento": 13 },
+    { "conta": "Cartão Passaí", "categoria": "Cartão", "valor": 16.65 },
+    { "conta": "Cartão ITAU (Let)", "categoria": "Cartão", "valor": 0.00 },
+    { "conta": "Energia (CPFL)", "categoria": "Moradia", "valor": 267.74, "dia_vencimento": 20 },
+    { "conta": "FIES", "categoria": "Financiamento", "valor": 258.29, "dia_vencimento": 11 },
+    { "conta": "Dentista", "categoria": "Saúde", "valor": 100.00, "forma_pagamento": "Dinheiro", "avulso": true },
+    { "conta": "Internet", "categoria": "Serviços", "valor": 118.00, "dia_vencimento": 12, "obs": "- 10 reais se pagar no prazo" },
+    { "conta": "Empréstimo NU", "categoria": "Financiamento", "valor": 360.98, "dia_vencimento": 10, "parcela": 12, "parcelas_totais": 12, "encerra_apos": true },
+    { "conta": "IPVA", "categoria": "Impostos", "valor": 531.62, "dia_vencimento": 13, "forma_pagamento": "Nubank", "parcela": 5, "parcelas_totais": 5, "encerra_apos": true }
+  ]
+}
