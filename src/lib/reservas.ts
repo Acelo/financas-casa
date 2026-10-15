@@ -37,12 +37,21 @@ export function saldoRegistrado(movs: Movimento[], ate?: string) {
 export async function buscarCDI(de: string): Promise<TaxaDia[] | null> {
   const br = (iso: string) => iso.split("-").reverse().join("/");
   const hoje = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
-  const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial=${br(de)}&dataFinal=${br(hoje)}`;
+  // Começa 10 dias antes: um intervalo sem nenhum dia útil publicado (ex.:
+  // caixinha criada hoje) faz o BCB responder erro em vez de lista vazia
+  const inicio = new Date(`${de}T12:00:00Z`);
+  inicio.setUTCDate(inicio.getUTCDate() - 10);
+  const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial=${br(inicio.toISOString().slice(0, 10))}&dataFinal=${br(hoje)}`;
   try {
-    const resp = await fetch(url, { next: { revalidate: 6 * 3600 } });
+    const resp = await fetch(url, {
+      headers: { Accept: "application/json", "User-Agent": "financas-casa" },
+      next: { revalidate: 6 * 3600 },
+    });
     if (!resp.ok) return null;
-    const dados: { data: string; valor: string }[] = await resp.json();
-    return dados.map((d) => ({
+    const dados: unknown = await resp.json();
+    // "Value(s) not found" vem como objeto { erro } com HTTP 200: sem taxas no período
+    if (!Array.isArray(dados)) return [];
+    return (dados as { data: string; valor: string }[]).map((d) => ({
       data: d.data.split("/").reverse().join("-"),
       taxa: Number(d.valor),
     }));
@@ -91,7 +100,7 @@ function diasEntre(de: string, ate: string) {
 }
 
 // Lote: um pedaço do saldo com data de aplicação própria (para IR/IOF)
-type Lote = { data: string; principal: number; valor: number; irBase: number };
+type Lote = { data: string; principal: number; valor: number; irBase: number; semIOF?: boolean };
 
 // Resgate sai dos lotes mais antigos primeiro (como faz o banco)
 function resgatar(lotes: Lote[], quanto: number) {
@@ -114,7 +123,10 @@ export function estimar(
   cdi: TaxaDia[] | null,
   hoje: string,
 ): Estimativa | null {
-  if (indexador === "nenhum" || !taxa || !cdi?.length) return null;
+  if (indexador === "nenhum" || !taxa) return null;
+  // Sem CDI (falha na consulta ou nada publicado ainda): não estima
+  // rendimento novo, mas o líquido continua sendo calculado
+  const serie = cdi ?? [];
 
   const ordenados = [...movs].sort((a, b) => a.data.localeCompare(b.data));
   const ancora = ordenados.filter((m) => m.tipo === "saldo_inicial" || m.tipo === "rendimento").at(-1);
@@ -125,8 +137,8 @@ export function estimar(
       ? (taxaCdi / 100) * (taxa / 100)
       : (1 + taxa / 100) ** (1 / 252) - 1; // prefixado: % a.a. em 252 dias úteis
 
-  const taxas = new Map(cdi.map((t) => [t.data, t.taxa]));
-  const ultimaPublicada = cdi.at(-1)!;
+  const taxas = new Map(serie.map((t) => [t.data, t.taxa]));
+  const ultimaPublicada = serie.at(-1);
 
   // Imposto já embutido no saldo até a âncora. Quando o banco informou o
   // líquido, é exato (bruto - líquido). Sem isso, cada rendimento lançado
@@ -148,9 +160,10 @@ export function estimar(
   }
 
   // O saldo da âncora vira o primeiro lote; cada aporte depois dela, outro.
-  // Como a idade real do dinheiro antigo não é conhecida, o ganho novo sobre
-  // ele conta a partir da âncora (alíquota maior = estimativa conservadora).
-  const lotes: Lote[] = [{ data: ancora.data, principal: bal, valor: bal, irBase }];
+  // A idade real do dinheiro antigo não é conhecida: o IR do ganho novo sobre
+  // ele conta a partir da âncora (alíquota maior = estimativa conservadora),
+  // mas sem IOF, que só existe nos primeiros 30 dias de cada aplicação.
+  const lotes: Lote[] = [{ data: ancora.data, principal: bal, valor: bal, irBase, semIOF: true }];
   const pendentes = ordenados.filter((m) => m.data > ancora.data);
   let p = 0;
   const aplicar = (ate: string) => {
@@ -168,7 +181,7 @@ export function estimar(
     let taxaCdi = taxas.get(d);
     // Dias ainda sem taxa publicada (o BCB publica com 1 dia de atraso):
     // usa a última taxa conhecida em dias de semana
-    if (taxaCdi === undefined && d > ultimaPublicada.data && diaUtilSimples(d)) {
+    if (taxaCdi === undefined && ultimaPublicada && d > ultimaPublicada.data && diaUtilSimples(d)) {
       taxaCdi = ultimaPublicada.taxa;
     }
     if (taxaCdi !== undefined) {
@@ -184,7 +197,7 @@ export function estimar(
     bruto += l.valor;
     const ganho = Math.max(0, l.valor - l.principal);
     const dias = diasEntre(l.data, hoje);
-    const iof = ganho * aliquotaIOF(dias);
+    const iof = l.semIOF ? 0 : ganho * aliquotaIOF(dias);
     impostos += l.irBase + iof + (ganho - iof) * aliquotaIR(dias);
   }
 
@@ -198,7 +211,7 @@ export function estimar(
     impostos: r2(impostos),
     baseInformada: ancora.valor_liquido != null,
     desde: ancora.data,
-    taxaAte: ultimaPublicada.data,
+    taxaAte: ultimaPublicada?.data ?? null,
   };
 }
 
