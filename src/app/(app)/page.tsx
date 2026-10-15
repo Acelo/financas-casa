@@ -8,20 +8,11 @@ import {
   nomeDoMes,
   somarMeses,
 } from "@/lib/format";
-
-type Lancamento = {
-  id: string;
-  valor_previsto: number;
-  valor_pago: number | null;
-  status: "pendente" | "pago";
-  parcela: number | null;
-  contas: {
-    nome: string;
-    categoria: string;
-    dia_vencimento: number | null;
-    parcelas_totais: number | null;
-  };
-};
+import { AcoesMes } from "./_components/acoes-mes";
+import {
+  LancamentoItem,
+  type LancamentoView,
+} from "./_components/lancamento-item";
 
 export default function ContasDoMes({ searchParams }: PageProps<"/">) {
   return (
@@ -46,10 +37,10 @@ async function Conteudo({
   const { data, error } = await supabase
     .from("lancamentos")
     .select(
-      "id, valor_previsto, valor_pago, status, parcela, contas!inner(nome, categoria, dia_vencimento, parcelas_totais)",
+      "id, valor_previsto, valor_pago, data_pagamento, status, parcela, obs, contas!inner(nome, categoria, dia_vencimento, parcelas_totais, recorrente)",
     )
     .eq("competencia", competenciaParaData(mes))
-    .returns<Lancamento[]>();
+    .returns<LancamentoView[]>();
 
   const lancamentos = (data ?? []).sort(
     (a, b) =>
@@ -66,11 +57,11 @@ async function Conteudo({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-2">
-        <Link href={`/?mes=${somarMeses(mes, -1)}`} className="rounded-md px-2 py-1 text-muted hover:bg-surface">
+        <Link href={`/?mes=${somarMeses(mes, -1)}`} className="rounded-md px-3 py-1 text-xl text-muted hover:bg-surface">
           ‹
         </Link>
         <h1 className="text-lg font-semibold">{nomeDoMes(mes)}</h1>
-        <Link href={`/?mes=${somarMeses(mes, 1)}`} className="rounded-md px-2 py-1 text-muted hover:bg-surface">
+        <Link href={`/?mes=${somarMeses(mes, 1)}`} className="rounded-md px-3 py-1 text-xl text-muted hover:bg-surface">
           ›
         </Link>
       </div>
@@ -87,29 +78,17 @@ async function Conteudo({
         <Resumo titulo="Falta pagar" valor={faltaPagar} destaque={faltaPagar > 0} />
       </div>
 
+      <AcoesMes key={mes} mes={mes} />
+
       {lancamentos.length === 0 && !error ? (
-        <p className="text-sm text-muted">Nenhuma conta lançada neste mês.</p>
+        <p className="text-sm text-muted">
+          Nenhuma conta lançada neste mês. Use &quot;Gerar contas do mês&quot; para
+          trazer as contas recorrentes.
+        </p>
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
           {lancamentos.map((l) => (
-            <li key={l.id} className="flex items-center gap-3 px-4 py-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{l.contas.nome}</p>
-                <p className="text-xs text-muted">
-                  {l.contas.categoria}
-                  {l.contas.dia_vencimento && ` · dia ${l.contas.dia_vencimento}`}
-                  {l.parcela && l.contas.parcelas_totais && ` · ${l.parcela}/${l.contas.parcelas_totais}`}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="font-mono tabular-nums">
-                  {formatBRL(l.valor_pago ?? l.valor_previsto)}
-                </p>
-                <p className={`text-xs ${l.status === "pago" ? "text-positive" : "text-negative"}`}>
-                  {l.status === "pago" ? "Pago" : "Pendente"}
-                </p>
-              </div>
-            </li>
+            <LancamentoItem key={l.id} l={l} />
           ))}
         </ul>
       )}
@@ -129,7 +108,7 @@ function Resumo({
   return (
     <div className="rounded-xl border border-border bg-surface p-3">
       <p className="text-xs text-muted">{titulo}</p>
-      <p className={`font-mono text-base tabular-nums sm:text-lg ${destaque ? "text-negative" : ""}`}>
+      <p className={`font-mono text-sm tabular-nums sm:text-lg ${destaque ? "text-negative" : ""}`}>
         {formatBRL(valor)}
       </p>
     </div>

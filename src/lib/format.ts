@@ -12,9 +12,11 @@ export function competenciaParaData(mes: string) {
   return `${mes}-01`;
 }
 
+// Mês corrente no fuso de Brasília (o servidor da Vercel roda em UTC)
 export function mesAtual() {
-  const hoje = new Date();
-  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+  return new Date()
+    .toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" })
+    .slice(0, 7);
 }
 
 export function nomeDoMes(mes: string) {

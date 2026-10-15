@@ -1,0 +1,150 @@
+"use client";
+
+import { useActionState, useState, useTransition } from "react";
+import { formatBRL } from "@/lib/format";
+import {
+  excluirLancamento,
+  marcarPago,
+  salvarLancamento,
+  type Resultado,
+} from "../actions";
+
+export type LancamentoView = {
+  id: string;
+  valor_previsto: number;
+  valor_pago: number | null;
+  data_pagamento: string | null;
+  status: "pendente" | "pago";
+  parcela: number | null;
+  obs: string | null;
+  contas: {
+    nome: string;
+    categoria: string;
+    dia_vencimento: number | null;
+    parcelas_totais: number | null;
+    recorrente: boolean;
+  };
+};
+
+const campo =
+  "w-full rounded-lg border border-border bg-background px-3 py-2 text-base outline-none focus:border-accent";
+
+function valorParaInput(v: number | null) {
+  return v === null ? "" : Number(v).toFixed(2).replace(".", ",");
+}
+
+export function LancamentoItem({ l }: { l: LancamentoView }) {
+  const [aberto, setAberto] = useState(false);
+  const [pendente, startTransition] = useTransition();
+  const [state, action, salvando] = useActionState<Resultado, FormData>(
+    async (prev, fd) => {
+      const r = await salvarLancamento(prev, fd);
+      if (r.ok) setAberto(false);
+      return r;
+    },
+    {},
+  );
+
+  const pago = l.status === "pago";
+  const diferenca =
+    pago && l.valor_pago !== null
+      ? Number(l.valor_pago) - Number(l.valor_previsto)
+      : 0;
+
+  return (
+    <li className={pendente ? "opacity-60" : ""}>
+      <div className="flex items-center gap-3 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setAberto((a) => !a)}
+          className="min-w-0 flex-1 text-left"
+        >
+          <p className="truncate font-medium">{l.contas.nome}</p>
+          <p className="text-xs text-muted">
+            {l.contas.categoria}
+            {l.contas.dia_vencimento && ` · dia ${l.contas.dia_vencimento}`}
+            {l.parcela && l.contas.parcelas_totais && ` · ${l.parcela}/${l.contas.parcelas_totais}`}
+            {!l.contas.recorrente && " · avulso"}
+          </p>
+        </button>
+
+        <div className="text-right">
+          <p className="font-mono tabular-nums">
+            {formatBRL(l.valor_pago ?? l.valor_previsto)}
+          </p>
+          {Math.abs(diferenca) >= 0.01 && (
+            <p className="text-xs text-muted">
+              prev. {formatBRL(l.valor_previsto)}
+            </p>
+          )}
+        </div>
+
+        {pago ? (
+          <span className="w-20 text-center text-xs font-medium text-positive">Pago</span>
+        ) : (
+          <button
+            type="button"
+            disabled={pendente}
+            onClick={() => startTransition(async () => { await marcarPago(l.id); })}
+            className="w-20 rounded-md border border-border px-2 py-1 text-xs font-medium text-negative hover:border-accent hover:text-accent"
+          >
+            Pagar
+          </button>
+        )}
+      </div>
+
+      {aberto && (
+        <form action={action} className="grid gap-3 border-t border-border bg-background/60 px-4 py-4 sm:grid-cols-2">
+          <input type="hidden" name="id" value={l.id} />
+
+          <label className="space-y-1">
+            <span className="text-xs text-muted">Valor previsto</span>
+            <input name="valor_previsto" inputMode="decimal" defaultValue={valorParaInput(l.valor_previsto)} className={campo} />
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs text-muted">Valor pago</span>
+            <input name="valor_pago" inputMode="decimal" defaultValue={valorParaInput(l.valor_pago)} placeholder="igual ao previsto" className={campo} />
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs text-muted">Status</span>
+            <select name="status" defaultValue={l.status} className={campo}>
+              <option value="pendente">Pendente</option>
+              <option value="pago">Pago</option>
+            </select>
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs text-muted">Data do pagamento</span>
+            <input name="data_pagamento" type="date" defaultValue={l.data_pagamento ?? ""} className={campo} />
+          </label>
+          <label className="space-y-1 sm:col-span-2">
+            <span className="text-xs text-muted">Observação</span>
+            <input name="obs" defaultValue={l.obs ?? ""} className={campo} />
+          </label>
+
+          {state.erro && <p className="text-sm text-negative sm:col-span-2">{state.erro}</p>}
+
+          <div className="flex gap-2 sm:col-span-2">
+            <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+              {salvando ? "Salvando..." : "Salvar"}
+            </button>
+            <button type="button" onClick={() => setAberto(false)} className="rounded-lg border border-border px-4 py-2 text-sm">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              disabled={pendente}
+              onClick={() => {
+                if (confirm(`Remover "${l.contas.nome}" deste mês?`)) {
+                  startTransition(async () => { await excluirLancamento(l.id); });
+                }
+              }}
+              className="ml-auto rounded-lg px-3 py-2 text-sm text-negative hover:underline"
+            >
+              Remover do mês
+            </button>
+          </div>
+        </form>
+      )}
+    </li>
+  );
+}
