@@ -35,6 +35,24 @@ export function nomeDoMes(mes: string) {
   return nome.charAt(0).toUpperCase() + nome.slice(1);
 }
 
+// "2026-10" -> "out/26" (eixos de gráfico)
+export function mesCurto(mes: string) {
+  const [ano, m] = mes.split("-").map(Number);
+  const nome = new Date(ano, m - 1, 1)
+    .toLocaleDateString("pt-BR", { month: "short" })
+    .replace(".", "");
+  return `${nome}/${String(ano).slice(2)}`;
+}
+
+// Todos os meses de "de" até "ate", inclusive
+export function listaMeses(de: string, ate: string) {
+  const meses: string[] = [];
+  for (let m = de; m <= ate && meses.length < 120; m = somarMeses(m, 1)) {
+    meses.push(m);
+  }
+  return meses;
+}
+
 export function somarMeses(mes: string, delta: number) {
   const [ano, m] = mes.split("-").map(Number);
   const d = new Date(ano, m - 1 + delta, 1);
