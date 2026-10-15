@@ -64,7 +64,8 @@ async function Conteudo({
         />
       </div>
 
-      <AcoesMes key={mes} mes={mes} />
+      {/* Chaves distintas: irmãos com a mesma key confundem o React ao trocar de mês */}
+      <AcoesMes key={`acoes-${mes}`} mes={mes} />
 
       {lancamentos.length === 0 && !error ? (
         <p className="text-sm text-muted">
@@ -72,7 +73,7 @@ async function Conteudo({
           trazer as contas recorrentes.
         </p>
       ) : (
-        <ListaLancamentos key={mes} lancamentos={lancamentos} />
+        <ListaLancamentos key={`lista-${mes}`} lancamentos={lancamentos} />
       )}
     </div>
   );

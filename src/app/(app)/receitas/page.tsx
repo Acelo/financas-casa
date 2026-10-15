@@ -89,7 +89,7 @@ async function Conteudo({
         </div>
       )}
 
-      <NovaReceita key={mes} mes={mes} pessoas={pessoas} />
+      <NovaReceita key={`nova-${mes}`}mes={mes} pessoas={pessoas} />
 
       {receitas.length === 0 && !erro ? (
         <p className="text-sm text-muted">Nenhuma receita lançada neste mês.</p>
