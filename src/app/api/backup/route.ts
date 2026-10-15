@@ -11,6 +11,9 @@ const TABELAS = [
   "lancamentos",
   "receitas",
   "juros_obra",
+  "reservas",
+  "reserva_movimentos",
+  "backups",
 ] as const;
 
 const PAGINA = 1000; // limite de linhas por consulta da Supabase

@@ -8,6 +8,7 @@ const itens = [
   { href: "/receitas", label: "Receitas", curto: "Receitas" },
   { href: "/recorrentes", label: "Recorrentes", curto: "Fixos" },
   { href: "/juros-obra", label: "Juros de obra", curto: "Juros" },
+  { href: "/reservas", label: "Reservas", curto: "Reservas" },
   { href: "/dashboard", label: "Dashboard", curto: "Painel" },
 ] as const;
 
@@ -43,12 +44,12 @@ export function MenuRodape() {
   const ativo = useAtivo();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden">
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-6">
         {itens.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`py-3 text-center text-xs ${
+            className={`py-3 text-center text-[11px] ${
               ativo(item.href) ? "font-semibold text-accent" : "text-muted"
             }`}
           >

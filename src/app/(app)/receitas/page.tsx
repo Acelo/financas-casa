@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { competenciaParaData, formatBRL, lerMes } from "@/lib/format";
+import { competenciaParaData, formatBRL, lerMes, somarMeses } from "@/lib/format";
 import { MesNav, Resumo } from "../_components/mes-nav";
 import { NovaReceita, ReceitaItem, type ReceitaView } from "./receita-form";
 
@@ -8,7 +9,7 @@ export default async function Receitas({ searchParams }: PageProps<"/receitas">)
   const competencia = competenciaParaData(mes);
   const supabase = await createClient();
 
-  const [receitasRes, membrosRes, contasRes] = await Promise.all([
+  const [receitasRes, membrosRes, contasRes, reservasRes] = await Promise.all([
     supabase
       .from("receitas")
       .select("id, pessoa, tipo, descricao, valor")
@@ -21,9 +22,19 @@ export default async function Receitas({ searchParams }: PageProps<"/receitas">)
       .from("lancamentos")
       .select("valor_previsto, valor_pago")
       .eq("competencia", competencia),
+    supabase
+      .from("reserva_movimentos")
+      .select("tipo, valor")
+      .in("tipo", ["aporte", "resgate"])
+      .gte("data", competencia)
+      .lt("data", competenciaParaData(somarMeses(mes, 1))),
   ]);
 
-  const erro = receitasRes.error ?? membrosRes.error ?? contasRes.error;
+  const erro = receitasRes.error ?? membrosRes.error ?? contasRes.error ?? reservasRes.error;
+  const somaReserva = (tipo: string) =>
+    (reservasRes.data ?? []).filter((m) => m.tipo === tipo).reduce((s, m) => s + Number(m.valor), 0);
+  const resgatado = somaReserva("resgate");
+  const guardado = somaReserva("aporte");
   const receitas = receitasRes.data ?? [];
   const pessoas = [...(membrosRes.data ?? []).map((m) => m.nome as string), "Outro"];
 
@@ -62,6 +73,35 @@ export default async function Receitas({ searchParams }: PageProps<"/receitas">)
           className="col-span-2 sm:col-span-1"
         />
       </div>
+
+      {/* Reservas: só mostra, não altera o saldo do mês */}
+      {(resgatado > 0 || guardado > 0 || saldo > 0) && (
+        <div className="space-y-1 rounded-xl border border-border bg-surface p-3 text-sm">
+          {resgatado > 0 && (
+            <p>
+              Resgatado das reservas no mês: <span className="font-medium">{formatBRL(resgatado)}</span>
+              {saldo < 0 && (
+                <span className={saldo + resgatado >= 0 ? "text-positive" : "text-negative"}>
+                  {" "}
+                  · {saldo + resgatado >= 0 ? "a falta foi coberta" : `ainda faltam ${formatBRL(-(saldo + resgatado))}`}
+                </span>
+              )}
+            </p>
+          )}
+          {guardado > 0 && (
+            <p>
+              Guardado nas reservas no mês: <span className="font-medium">{formatBRL(guardado)}</span>
+            </p>
+          )}
+          {saldo - guardado > 0.009 && (
+            <Link
+              href={`/reservas?aporte=${(saldo - guardado).toFixed(2)}`}
+              className="inline-block pt-1 font-medium text-accent hover:underline"
+            >
+              Guardar {formatBRL(saldo - guardado)} da sobra na reserva →
+            </Link>
+          )}        </div>
+      )}
 
       {porPessoa.size > 0 && (
         <div className="grid gap-3 sm:grid-cols-2">

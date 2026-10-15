@@ -6,6 +6,7 @@ import {
   mesAtual,
   somarMeses,
 } from "@/lib/format";
+import { comSinal, type Movimento } from "@/lib/reservas";
 import { Resumo } from "../_components/mes-nav";
 import { FiltroPeriodo } from "./filtro-periodo";
 import {
@@ -40,7 +41,7 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
   const deData = competenciaParaData(de);
   const ateData = competenciaParaData(ate);
 
-  const [lancRes, recRes, jurosRes] = await Promise.all([
+  const [lancRes, recRes, jurosRes, movRes] = await Promise.all([
     supabase
       .from("lancamentos")
       .select("competencia, valor_previsto, valor_pago, contas!inner(nome, categoria)")
@@ -59,8 +60,15 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
       .gte("competencia", deData)
       .lte("competencia", ateData)
       .returns<Juro[]>(),
+    // Reservas: todo o histórico até o fim do período (o saldo é acumulado)
+    supabase
+      .from("reserva_movimentos")
+      .select("data, tipo, valor")
+      .lt("data", competenciaParaData(somarMeses(ate, 1)))
+      .returns<Pick<Movimento, "data" | "tipo" | "valor">[]>(),
   ]);
-  const erro = lancRes.error ?? recRes.error ?? jurosRes.error;
+  const erro = lancRes.error ?? recRes.error ?? jurosRes.error ?? movRes.error;
+  const movsReserva = movRes.data ?? [];
   const lancs = lancRes.data ?? [];
   const recs = recRes.data ?? [];
   const juros = jurosRes.data ?? [];
@@ -116,6 +124,26 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
     const i = mesDe(j.competencia);
     if (i !== undefined) jurosSerie[i] = Number(j.valor);
   }
+
+  // Reservas: saldo registrado no fim de cada mês + aportes/resgates/rendimento
+  const aportes = zeros();
+  const resgates = zeros();
+  let rendimentoPeriodo = 0;
+  const saldoReserva: (number | null)[] = meses.map((m) => {
+    const fim = competenciaParaData(somarMeses(m, 1));
+    const anteriores = movsReserva.filter((x) => x.data < fim);
+    return anteriores.length
+      ? Math.round(anteriores.reduce((s, x) => s + comSinal(x), 0) * 100) / 100
+      : null;
+  });
+  for (const x of movsReserva) {
+    const i = mesDe(x.data);
+    if (i === undefined) continue;
+    if (x.tipo === "aporte") aportes[i] += Number(x.valor);
+    if (x.tipo === "resgate") resgates[i] += Number(x.valor);
+    if (x.tipo === "rendimento") rendimentoPeriodo += Number(x.valor);
+  }
+  const temReserva = saldoReserva.some((v) => v !== null);
 
   const totalReceitas = receitas.reduce((a, b) => a + b, 0);
   const totalDespesas = despesas.reduce((a, b) => a + b, 0);
@@ -209,6 +237,29 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
           )}
         </Cartao>
       </div>
+
+      {temReserva && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Cartao titulo="Saldo das reservas (fim de cada mês)">
+            <Linhas
+              meses={meses}
+              series={[{ nome: "Saldo das reservas", cor: "var(--series-1)", valores: saldoReserva }]}
+            />
+            <p className="mt-3 text-sm text-muted">
+              Saldo registrado. Rendimento lançado no período: {formatBRL(rendimentoPeriodo)}
+            </p>
+          </Cartao>
+          <Cartao titulo="Aportes × resgates por mês">
+            <Colunas
+              meses={meses}
+              series={[
+                { nome: "Aportes", cor: "var(--series-1)", valores: aportes },
+                { nome: "Resgates", cor: "var(--series-2)", valores: resgates },
+              ]}
+            />
+          </Cartao>
+        </div>
+      )}
     </div>
   );
 }
