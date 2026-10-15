@@ -18,7 +18,7 @@
     { "conta": "Energia (CPFL)", "categoria": "Moradia", "valor": 267.74, "dia_vencimento": 20 },
     { "conta": "FIES", "categoria": "Financiamento", "valor": 258.29, "dia_vencimento": 11 },
     { "conta": "Dentista", "categoria": "Saúde", "valor": 100.00, "forma_pagamento": "Dinheiro", "avulso": true },
-    { "conta": "Internet", "categoria": "Serviços", "valor": 118.00, "dia_vencimento": 12, "obs": "- 10 reais se pagar no prazo" },
+    { "conta": "Internet", "categoria": "Serviços", "valor": 118.00, "dia_vencimento": 12, "obs": "- 10 reais se pagar no prazo. Pago (planilha estava desatualizada)" },
     { "conta": "Empréstimo NU", "categoria": "Financiamento", "valor": 360.98, "dia_vencimento": 10, "parcela": 12, "parcelas_totais": 12, "encerra_apos": true },
     { "conta": "IPVA", "categoria": "Impostos", "valor": 531.62, "dia_vencimento": 13, "forma_pagamento": "Nubank", "parcela": 5, "parcelas_totais": 5, "encerra_apos": true }
   ]

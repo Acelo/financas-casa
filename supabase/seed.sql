@@ -102,7 +102,7 @@ VALUES
    , ( DATE '2026-10-01', 2533.12, DATE '2026-10-10' );
 
 -- ---------------------------------------------------------------------
--- Lançamentos de 10/2026 (coluna F). Internet estava pendente na planilha.
+-- Lançamentos de 10/2026 (coluna F). Todos pagos.
 -- ---------------------------------------------------------------------
 INSERT INTO public.lancamentos (conta_id, competencia, valor_previsto, valor_pago, status, parcela)
 SELECT C.id
@@ -128,7 +128,7 @@ SELECT C.id
            , ( 'Energia (CPFL)',      267.74, 'pago',     NULL )
            , ( 'FIES',                258.29, 'pago',     111 )
            , ( 'Dentista',            100.00, 'pago',     NULL )
-           , ( 'Internet',            118.00, 'pendente', NULL )
+           , ( 'Internet',            118.00, 'pago',     NULL )
            , ( 'Empréstimo NU',       360.98, 'pago',     12 )
            , ( 'IPVA',                531.62, 'pago',     5 )
        ) AS X (nome, valor, status, parcela)
@@ -136,9 +136,9 @@ SELECT C.id
  WHERE 1 = 1;
 
 -- ---------------------------------------------------------------------
--- Quem pode acessar: TROQUE pelos e-mails que vocês vão usar no login
+-- Quem pode acessar (e-mails usados no login)
 -- ---------------------------------------------------------------------
 INSERT INTO public.membros (email, nome)
 VALUES
-     ( 'SEU_EMAIL_AQUI',     'Tulio' )
-   , ( 'EMAIL_ESPOSA_AQUI',  'Letícia' );
+     ( 'tulio.acelo@hotmail.com',  'Tulio' )
+   , ( 'elinahdourado@gmail.com',  'Letícia' );
