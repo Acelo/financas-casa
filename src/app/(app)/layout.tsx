@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { sair } from "../login/actions";
+import { Gestos } from "./_components/gestos";
 import { MenuRodape, MenuTopo } from "./_components/menu";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
@@ -19,8 +20,8 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           </form>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-24 sm:pb-6">
-        {children}
+      <main className="mx-auto w-full max-w-5xl flex-1 overflow-x-clip px-4 pt-6 pb-24 sm:pb-6">
+        <Gestos>{children}</Gestos>
       </main>
       <MenuRodape />
     </div>

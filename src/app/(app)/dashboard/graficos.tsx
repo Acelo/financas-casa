@@ -202,7 +202,7 @@ export function Colunas({
   return (
     <div>
       <Legenda series={series} tipo="barra" />
-      <div ref={ref} className="relative" onPointerLeave={() => setHover(null)}>
+      <div ref={ref} data-sem-gesto className="relative" onPointerLeave={() => setHover(null)}>
         <svg width="100%" viewBox={`0 0 ${largura} ${base + EIXO_X}`} className="block overflow-visible" role="img" aria-label="Gráfico de colunas por mês">
           <Grade escala={escala} ys={ys} largura={largura} />
           {meses.map((m, i) => {
@@ -302,6 +302,7 @@ export function Linhas({ meses, series }: { meses: string[]; series: Serie[] }) 
       )}
       <div
         ref={ref}
+        data-sem-gesto
         className="relative outline-none"
         tabIndex={0}
         onPointerMove={(e) => apontar(e.clientX)}

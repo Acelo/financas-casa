@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const itens = [
+// Ordem das abas: também é a ordem do deslizar para os lados no celular
+export const itens = [
   { href: "/", label: "Contas do mês", curto: "Contas" },
   { href: "/receitas", label: "Receitas", curto: "Receitas" },
   { href: "/recorrentes", label: "Recorrentes", curto: "Fixos" },
