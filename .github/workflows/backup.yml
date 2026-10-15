@@ -1,0 +1,79 @@
+# Backup semanal do banco da Supabase.
+# Gera um dump SQL do schema public (estrutura + dados), comprime e guarda no
+# ramo "backups" deste repositório. Registra a execução em public.backups para
+# o app mostrar a data/hora do último backup.
+#
+# Requer o segredo SUPABASE_DB_URL (Settings > Secrets and variables > Actions)
+# com a connection string do "Session pooler" da Supabase, senha incluída.
+# O pooler é necessário: a conexão direta é só IPv6 e o GitHub não tem IPv6.
+
+name: Backup semanal do banco
+
+on:
+  schedule:
+    - cron: "0 6 * * 0" # domingo 06:00 UTC = 03:00 em Brasília
+  workflow_dispatch: # botão "Run workflow" para rodar na hora
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - name: Conferir segredo
+        run: |
+          if [ -z "$DB_URL" ]; then
+            echo "::error::Segredo SUPABASE_DB_URL não configurado."
+            exit 1
+          fi
+
+      - name: Descobrir a versão do Postgres do servidor
+        run: |
+          MAJOR=$(docker run --rm -e DB_URL postgres:17 sh -c 'psql "$DB_URL" -tAc "select current_setting('"'"'server_version_num'"'"')::int / 10000"')
+          echo "Servidor Postgres $MAJOR"
+          echo "PG_MAJOR=$MAJOR" >> "$GITHUB_ENV"
+
+      - name: Gerar o dump
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          # pg_dump precisa ser da mesma versão (ou maior) que o servidor
+          docker run --rm -e DB_URL -v "$RUNNER_TEMP/out:/out" "postgres:$PG_MAJOR" \
+            sh -c 'pg_dump "$DB_URL" --schema=public --no-owner --no-privileges --file=/out/backup.sql'
+          CARIMBO=$(TZ=America/Sao_Paulo date +%Y-%m-%d_%H%M)
+          gzip -9 -c "$RUNNER_TEMP/out/backup.sql" > "$RUNNER_TEMP/out/$CARIMBO.sql.gz"
+          echo "ARQUIVO=$CARIMBO.sql.gz" >> "$GITHUB_ENV"
+          echo "TAMANHO=$(stat -c %s "$RUNNER_TEMP/out/$CARIMBO.sql.gz")" >> "$GITHUB_ENV"
+
+      - name: Guardar no ramo "backups"
+        run: |
+          git init -q repo && cd repo
+          git config user.name "backup-bot"
+          git config user.email "backup-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin backups; then
+            git checkout -q -b backups FETCH_HEAD
+          else
+            git checkout -q --orphan backups
+          fi
+          mkdir -p backups
+          cp "$RUNNER_TEMP/out/$ARQUIVO" backups/
+          # A Vercel lê o vercel.json do próprio commit: sem isto ela tentaria
+          # publicar o ramo de backups a cada execução
+          echo '{ "git": { "deploymentEnabled": { "backups": false } } }' > vercel.json
+          git add backups vercel.json
+          git commit -q -m "Backup $ARQUIVO"
+          git push -q origin backups
+
+      - name: Registrar no app
+        run: |
+          docker run --rm -e DB_URL "postgres:$PG_MAJOR" \
+            psql "$DB_URL" -v ON_ERROR_STOP=1 -q \
+            -c "insert into public.backups (tipo, arquivo, tamanho_bytes) values ('automatico', '$ARQUIVO', $TAMANHO)"

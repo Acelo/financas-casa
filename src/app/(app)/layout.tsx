@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { sair } from "../login/actions";
 import { MenuRodape, MenuTopo } from "./_components/menu";
 
@@ -8,6 +9,9 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
           <span className="flex-1 font-semibold sm:flex-none">Finanças da Casa</span>
           <MenuTopo />
+          <Link href="/backup" className="text-sm text-muted hover:text-foreground">
+            Backup
+          </Link>
           <form action={sair}>
             <button className="text-sm text-muted hover:text-foreground">
               Sair
