@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { formatBRL, mesCurto, nomeDoMes } from "@/lib/format";
+import { IconeCategoria } from "../_components/icones";
 
 // Gráficos em SVG puro. Regras seguidas: um eixo só, marcas finas (barras
 // <= 24px com ponta arredondada de 4px, linhas de 2px, pontos >= 8px com anel
@@ -366,7 +367,10 @@ export function BarrasHorizontais({
       {itens.map((i) => (
         <li key={i.rotulo} title={`${i.rotulo}: ${formatBRL(i.valor)}`}>
           <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
-            <span className="truncate">{i.rotulo}</span>
+            <span className="flex min-w-0 items-center gap-2">
+              <IconeCategoria categoria={i.rotulo} className="size-4 shrink-0 text-muted" />
+              <span className="truncate">{i.rotulo}</span>
+            </span>
             <span className="whitespace-nowrap tabular-nums">
               <span className="font-medium">{formatBRL(i.valor)}</span>
               <span className="ml-2 text-xs text-muted">

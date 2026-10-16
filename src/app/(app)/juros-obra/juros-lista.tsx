@@ -39,7 +39,7 @@ export function JurosLista({
       </button>
 
       {novo && (
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="rounded-xl vidro p-4">
           <FormJuros mesPadrao={proximoMes} aoTerminar={() => setNovo(false)} />
         </div>
       )}
@@ -47,7 +47,7 @@ export function JurosLista({
       {registros.length === 0 ? (
         <p className="text-sm text-muted">Nenhum mês lançado.</p>
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+        <ul className="divide-y divide-border overflow-hidden rounded-xl vidro">
           {registros.map((r) => (
             <JurosItem key={r.competencia} r={r} maior={maior} />
           ))}

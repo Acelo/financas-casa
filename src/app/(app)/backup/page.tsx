@@ -59,7 +59,7 @@ export default async function BackupPage() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="rounded-xl vidro p-4">
           <p className="text-xs text-muted">Último backup automático (semanal)</p>
           <p className="text-lg font-semibold">
             {ultimoAuto ? dataHora(ultimoAuto.criado_em) : "Nenhum ainda"}
@@ -74,7 +74,7 @@ export default async function BackupPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="rounded-xl vidro p-4">
           <p className="text-xs text-muted">Último backup manual</p>
           <p className="text-lg font-semibold">
             {ultimoManual ? dataHora(ultimoManual.criado_em) : "Nenhum ainda"}
@@ -89,7 +89,7 @@ export default async function BackupPage() {
       {backups.length > 0 && (
         <section className="space-y-2">
           <h2 className="px-1 font-medium">Histórico</h2>
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface text-sm">
+          <ul className="divide-y divide-border overflow-hidden rounded-xl vidro text-sm">
             {backups.map((b) => (
               <li key={b.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">

@@ -260,7 +260,7 @@ export function Gestos({ children }: { children: React.ReactNode }) {
           className="pointer-events-none fixed inset-x-0 top-[env(safe-area-inset-top)] z-20 flex justify-center"
           style={{ transform: `translateY(${girando ? 56 : puxado}px)` }}
         >
-          <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted shadow">
+          <div className="flex items-center gap-2 rounded-full vidro px-3 py-1.5 text-xs text-muted shadow">
             <span
               className={`inline-block size-3.5 rounded-full border-2 border-accent border-t-transparent ${girando ? "animate-spin" : ""}`}
               style={girando ? undefined : { transform: `rotate(${puxado * 4}deg)` }}

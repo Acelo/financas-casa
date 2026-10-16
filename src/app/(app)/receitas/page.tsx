@@ -76,7 +76,7 @@ export default async function Receitas({ searchParams }: PageProps<"/receitas">)
 
       {/* Reservas: só mostra, não altera o saldo do mês */}
       {(resgatado > 0 || guardado > 0 || saldo > 0) && (
-        <div className="space-y-1 rounded-xl border border-border bg-surface p-3 text-sm">
+        <div className="space-y-1 rounded-xl vidro p-3 text-sm">
           {resgatado > 0 && (
             <p>
               Resgatado das reservas no mês: <span className="font-medium">{formatBRL(resgatado)}</span>
@@ -106,7 +106,7 @@ export default async function Receitas({ searchParams }: PageProps<"/receitas">)
       {porPessoa.size > 0 && (
         <div className="grid gap-3 sm:grid-cols-2">
           {[...porPessoa].map(([pessoa, v]) => (
-            <div key={pessoa} className="rounded-xl border border-border bg-surface p-3 text-sm">
+            <div key={pessoa} className="rounded-xl vidro p-3 text-sm">
               <p className="font-medium">{pessoa}</p>
               <p className="text-muted">
                 Salário {formatBRL(v.salario)} · Extras {formatBRL(v.extra)}
@@ -121,7 +121,7 @@ export default async function Receitas({ searchParams }: PageProps<"/receitas">)
       {receitas.length === 0 && !erro ? (
         <p className="text-sm text-muted">Nenhuma receita lançada neste mês.</p>
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+        <ul className="divide-y divide-border overflow-hidden rounded-xl vidro">
           {receitas.map((r) => (
             <ReceitaItem key={r.id} r={r} mes={mes} pessoas={pessoas} />
           ))}

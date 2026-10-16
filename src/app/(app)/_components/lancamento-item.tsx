@@ -74,11 +74,15 @@ export function LancamentoItem({
           className="min-w-0 flex-1 text-left"
         >
           <p className="truncate font-medium">{l.contas.nome}</p>
+          {/* A categoria já está no título do grupo */}
           <p className="text-xs text-muted">
-            {l.contas.categoria}
-            {l.contas.dia_vencimento && ` · dia ${l.contas.dia_vencimento}`}
-            {l.parcela && l.contas.parcelas_totais && ` · ${l.parcela}/${l.contas.parcelas_totais}`}
-            {!l.contas.recorrente && " · avulso"}
+            {[
+              l.contas.dia_vencimento && `dia ${l.contas.dia_vencimento}`,
+              l.parcela && l.contas.parcelas_totais && `${l.parcela}/${l.contas.parcelas_totais}`,
+              !l.contas.recorrente && "avulso",
+            ]
+              .filter(Boolean)
+              .join(" · ") || " "}
           </p>
         </button>
 

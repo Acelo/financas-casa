@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { excluirLancamentos, type Resultado } from "../actions";
+import { formatBRL } from "@/lib/format";
+import { IconeCategoria } from "./icones";
 import { LancamentoItem, type LancamentoView } from "./lancamento-item";
 
 export function ListaLancamentos({ lancamentos }: { lancamentos: LancamentoView[] }) {
@@ -14,6 +16,7 @@ export function ListaLancamentos({ lancamentos }: { lancamentos: LancamentoView[
   const ids = new Set(lancamentos.map((l) => l.id));
   const selecionados = [...marcados].filter((id) => ids.has(id));
   const todos = selecionados.length === lancamentos.length && lancamentos.length > 0;
+  const grupos = agrupar(lancamentos);
 
   function alternar(id: string) {
     setMarcados((atual) => {
@@ -47,7 +50,7 @@ export function ListaLancamentos({ lancamentos }: { lancamentos: LancamentoView[
             <button
               type="button"
               onClick={() => setMarcados(todos ? new Set() : new Set(ids))}
-              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm"
+              className="rounded-lg vidro px-3 py-1.5 text-sm"
             >
               {todos ? "Desmarcar todos" : "Selecionar todos"}
             </button>
@@ -73,7 +76,7 @@ export function ListaLancamentos({ lancamentos }: { lancamentos: LancamentoView[
               setMsg({});
               setSelecionando(true);
             }}
-            className="ml-auto rounded-lg border border-border bg-surface px-3 py-1.5 text-sm"
+            className="ml-auto rounded-lg vidro px-3 py-1.5 text-sm"
           >
             Selecionar
           </button>
@@ -84,19 +87,64 @@ export function ListaLancamentos({ lancamentos }: { lancamentos: LancamentoView[
         <p className={`text-sm ${msg.erro ? "text-negative" : "text-muted"}`}>{msg.erro ?? msg.ok}</p>
       )}
 
-      <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
-        {lancamentos.map((l) => (
-          <LancamentoItem
-            key={l.id}
-            l={l}
-            selecao={{
-              ativo: selecionando,
-              marcado: selecionando && marcados.has(l.id),
-              alternar: () => alternar(l.id),
-            }}
-          />
-        ))}
-      </ul>
+      {grupos.map(([categoria, itens]) => {
+        const subtotal = itens.reduce((s, l) => s + Number(l.valor_pago ?? l.valor_previsto), 0);
+        const pendentes = itens.filter((l) => l.status === "pendente").length;
+        const idsGrupo = itens.map((l) => l.id);
+        const grupoTodo = idsGrupo.every((id) => marcados.has(id));
+        return (
+          <section key={categoria} className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              {selecionando && (
+                <input
+                  type="checkbox"
+                  checked={grupoTodo}
+                  onChange={() =>
+                    setMarcados((atual) => {
+                      const novo = new Set(atual);
+                      idsGrupo.forEach((id) => (grupoTodo ? novo.delete(id) : novo.add(id)));
+                      return novo;
+                    })
+                  }
+                  aria-label={`Selecionar ${categoria}`}
+                  className="size-4 accent-[var(--accent)]"
+                />
+              )}
+              <IconeCategoria categoria={categoria} className="size-4 text-muted" />
+              <h2 className="font-medium">{categoria}</h2>
+              <span className="text-xs text-muted">
+                {itens.length}
+                {pendentes > 0 && ` · ${pendentes} pendente${pendentes > 1 ? "s" : ""}`}
+              </span>
+              <span className="ml-auto text-sm tabular-nums text-muted">{formatBRL(subtotal)}</span>
+            </div>
+            <ul className="divide-y divide-border overflow-hidden rounded-xl vidro">
+              {itens.map((l) => (
+                <LancamentoItem
+                  key={l.id}
+                  l={l}
+                  selecao={{
+                    ativo: selecionando,
+                    marcado: selecionando && marcados.has(l.id),
+                    alternar: () => alternar(l.id),
+                  }}
+                />
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
+  );
+}
+
+// Faturas de cartão por último, como em Recorrentes; o resto em ordem alfabética
+function agrupar(lancamentos: LancamentoView[]) {
+  const mapa = new Map<string, LancamentoView[]>();
+  for (const l of lancamentos) {
+    mapa.set(l.contas.categoria, [...(mapa.get(l.contas.categoria) ?? []), l]);
+  }
+  return [...mapa].sort(([a], [b]) =>
+    a === "Cartão" ? 1 : b === "Cartão" ? -1 : a.localeCompare(b),
   );
 }

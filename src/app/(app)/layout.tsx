@@ -6,7 +6,7 @@ import { MenuRodape, MenuTopo } from "./_components/menu";
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+      <header className="vidro-cabecalho sticky top-0 z-10 pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
           <span className="flex-1 font-semibold sm:flex-none">Finanças da Casa</span>
           <MenuTopo />

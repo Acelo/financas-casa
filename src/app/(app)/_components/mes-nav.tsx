@@ -29,7 +29,7 @@ export function Resumo({
   const classeCor =
     cor === "positivo" ? "text-positive" : cor === "negativo" ? "text-negative" : "";
   return (
-    <div className={`min-w-0 rounded-xl border border-border bg-surface p-3 ${className}`}>
+    <div className={`min-w-0 rounded-xl vidro p-3 ${className}`}>
       <p className="text-xs text-muted">{titulo}</p>
       <p className={`whitespace-nowrap text-lg font-semibold tabular-nums ${classeCor}`}>
         {valor}

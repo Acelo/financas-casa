@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { formatBRL, nomeDoMes } from "@/lib/format";
 import { valorParaInput } from "@/lib/valores";
+import { IconeCategoria } from "../_components/icones";
 import { Resumo } from "../_components/mes-nav";
 import type { Resultado } from "../actions";
 import { alternarAtivo, reajustarValor, salvarConta } from "./actions";
@@ -73,7 +74,7 @@ export function RecorrentesLista({ contas, mes }: { contas: ContaView[]; mes: st
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex rounded-lg border border-border bg-surface p-0.5 text-sm">
+        <div className="flex rounded-lg vidro p-0.5 text-sm">
           {(["ativos", "cancelados", "todos"] as const).map((f) => (
             <button
               key={f}
@@ -95,7 +96,7 @@ export function RecorrentesLista({ contas, mes }: { contas: ContaView[]; mes: st
       </div>
 
       {nova && (
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="rounded-xl vidro p-4">
           <FormConta aoTerminar={() => setNova(false)} />
         </div>
       )}
@@ -106,7 +107,10 @@ export function RecorrentesLista({ contas, mes }: { contas: ContaView[]; mes: st
         return (
           <section key={cat} className="space-y-2">
             <div className="flex items-baseline justify-between px-1">
-              <h2 className="font-medium">{cat}</h2>
+              <h2 className="flex items-center gap-2 font-medium">
+                <IconeCategoria categoria={cat} className="size-4 text-muted" />
+                {cat}
+              </h2>
               <span className="text-sm tabular-nums text-muted">{formatBRL(subtotal)}</span>
             </div>
             {cat === CATEGORIA_CARTAO && (
@@ -114,7 +118,7 @@ export function RecorrentesLista({ contas, mes }: { contas: ContaView[]; mes: st
                 Valores da última fatura. Não entram no total: as assinaturas no crédito já estão dentro delas.
               </p>
             )}
-            <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+            <ul className="divide-y divide-border overflow-hidden rounded-xl vidro">
               {itens.map((c) => (
                 <ContaItem key={c.id} c={c} mes={mes} />
               ))}
@@ -296,7 +300,7 @@ function FormReajuste({ conta, mes }: { conta: ContaView; mes: string }) {
         <input name="mes" type="month" required defaultValue={mes} className={campo} />
       </label>
       <div className="flex items-end sm:col-span-2">
-        <button type="submit" disabled={salvando} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm disabled:opacity-60">
+        <button type="submit" disabled={salvando} className="rounded-lg vidro px-4 py-2 text-sm disabled:opacity-60">
           {salvando ? "Salvando..." : "Registrar reajuste"}
         </button>
       </div>

@@ -33,7 +33,7 @@ export function AcoesMes({ mes }: { mes: string }) {
         <button
           type="button"
           onClick={() => setAvulsoAberto((a) => !a)}
-          className="rounded-lg border border-border bg-surface px-4 py-2 text-sm"
+          className="rounded-lg vidro px-4 py-2 text-sm"
         >
           + Gasto avulso
         </button>
@@ -46,7 +46,7 @@ export function AcoesMes({ mes }: { mes: string }) {
       )}
 
       {avulsoAberto && (
-        <form action={action} className="grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-4">
+        <form action={action} className="grid gap-3 rounded-xl vidro p-4 sm:grid-cols-4">
           <input type="hidden" name="mes" value={mes} />
           <label className="space-y-1 sm:col-span-2">
             <span className="text-xs text-muted">Descrição</span>

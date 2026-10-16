@@ -117,7 +117,7 @@ export function NovaReceita({ mes, pessoas }: { mes: string; pessoas: string[] }
           type="button"
           disabled={copiando}
           onClick={() => startTransition(async () => setMsg(await copiarSalarios(mes)))}
-          className="rounded-lg border border-border bg-surface px-4 py-2 text-sm disabled:opacity-60"
+          className="rounded-lg vidro px-4 py-2 text-sm disabled:opacity-60"
         >
           {copiando ? "Copiando..." : "Copiar salários do mês anterior"}
         </button>
@@ -128,7 +128,7 @@ export function NovaReceita({ mes, pessoas }: { mes: string; pessoas: string[] }
       )}
 
       {aberto && (
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="rounded-xl vidro p-4">
           <Formulario mes={mes} pessoas={pessoas} aoTerminar={() => setAberto(false)} />
         </div>
       )}

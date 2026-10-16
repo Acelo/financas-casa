@@ -266,7 +266,7 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
 
 function Cartao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <section className="min-w-0 rounded-xl border border-border bg-surface p-4">
+    <section className="min-w-0 rounded-xl vidro p-4">
       <h2 className="mb-3 font-medium">{titulo}</h2>
       {children}
     </section>

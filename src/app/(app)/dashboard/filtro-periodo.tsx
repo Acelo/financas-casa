@@ -15,7 +15,7 @@ export function FiltroPeriodo({ de, ate, atual }: { de: string; ate: string; atu
 
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-surface p-0.5 text-sm">
+      <div className="flex flex-wrap gap-1 rounded-lg vidro p-0.5 text-sm">
         {atalhos.map((a) => {
           const ativo = a.de === de && a.ate === ate;
           return (

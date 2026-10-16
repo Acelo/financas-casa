@@ -69,7 +69,7 @@ export function ReservasLista({
       </button>
 
       {nova && (
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="rounded-xl vidro p-4">
           <FormReserva hoje={hoje} aoTerminar={() => setNova(false)} />
         </div>
       )}
@@ -134,7 +134,7 @@ function CartaoReserva({
   );
 
   return (
-    <section className={`space-y-4 rounded-xl border border-border bg-surface p-4 ${r.ativo ? "" : "opacity-70"}`}>
+    <section className={`space-y-4 rounded-xl vidro p-4 ${r.ativo ? "" : "opacity-70"}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="truncate font-semibold">{r.nome}</h2>

@@ -13,7 +13,7 @@ export default function LoginPage() {
     <main className="flex flex-1 items-center justify-center px-4 py-12">
       <form
         action={action}
-        className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-surface p-6 shadow-sm"
+        className="w-full max-w-sm space-y-4 rounded-2xl vidro p-6 shadow-sm"
       >
         <div>
           <h1 className="text-xl font-semibold">Finanças da Casa</h1>
