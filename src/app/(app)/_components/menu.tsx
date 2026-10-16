@@ -7,7 +7,7 @@ import { icones } from "./icones";
 
 // Ordem das abas: também é a ordem do deslizar para os lados no celular
 export const itens = [
-  { href: "/", label: "Contas do mês", curto: "Contas" },
+  { href: "/contas", label: "Contas do mês", curto: "Contas" },
   { href: "/receitas", label: "Receitas", curto: "Receitas" },
   { href: "/recorrentes", label: "Recorrentes", curto: "Fixos" },
   { href: "/juros-obra", label: "Juros de obra", curto: "Juros" },
@@ -16,12 +16,15 @@ export const itens = [
 ] as const;
 
 function indiceAtivo(path: string) {
-  return itens.findIndex((i) => (i.href === "/" ? path === "/" : path.startsWith(i.href)));
+  return itens.findIndex((i) => path.startsWith(i.href));
 }
 
 // Menu no cabeçalho (PC/tablet)
 export function MenuTopo() {
-  const ativo = indiceAtivo(usePathname());
+  const pathname = usePathname();
+  const ativo = indiceAtivo(pathname);
+  // Na tela inicial os próprios atalhos são o menu
+  if (pathname === "/") return <div className="hidden flex-1 sm:block" />;
   return (
     <nav className="hidden flex-1 gap-1 text-sm sm:flex">
       {itens.map((item, i) => {
@@ -60,6 +63,9 @@ export function MenuRodape() {
   }
 
   const destaque = tocado ?? ativo;
+
+  // Tela inicial: os atalhos já são o menu, a barra seria redundante
+  if (pathname === "/") return null;
 
   return (
     <nav

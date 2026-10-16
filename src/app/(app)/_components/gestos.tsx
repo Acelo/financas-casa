@@ -23,13 +23,13 @@ function semAnimacao() {
 }
 
 function indiceDe(p: string) {
-  return itens.findIndex((i) => (i.href === "/" ? p === "/" : p.startsWith(i.href)));
+  return itens.findIndex((i) => p.startsWith(i.href));
 }
 
 // Contas e Receitas compartilham o mês escolhido
 function hrefCom(href: string) {
   const mes = new URLSearchParams(window.location.search).get("mes");
-  return mes && (href === "/" || href === "/receitas") ? `${href}?mes=${mes}` : href;
+  return mes && (href === "/contas" || href === "/receitas") ? `${href}?mes=${mes}` : href;
 }
 
 function ehMobile() {
@@ -152,7 +152,8 @@ export function Gestos({ children }: { children: React.ReactNode }) {
       if (modo === "indefinido") {
         if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
         const naBorda = x0 < BORDA || x0 > window.innerWidth - BORDA;
-        if (Math.abs(dx) > Math.abs(dy) * 1.5 && !naBorda) modo = "deslizar";
+        // Só desliza dentro de uma aba (a tela inicial não faz parte do carrossel)
+        if (Math.abs(dx) > Math.abs(dy) * 1.5 && !naBorda && indice() >= 0) modo = "deslizar";
         else if (dy > 0 && window.scrollY <= 0 && ehAppInstalado()) modo = "puxar";
         else modo = "nada";
       }
