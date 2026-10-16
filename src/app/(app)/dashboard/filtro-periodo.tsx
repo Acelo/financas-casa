@@ -39,7 +39,7 @@ export function FiltroPeriodo({ de, ate, atual }: { de: string; ate: string; atu
           <span className="block text-xs text-muted">Até</span>
           <input type="month" name="ate" defaultValue={ate} key={`ate-${ate}`} className={campo} />
         </label>
-        <button type="submit" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white">
+        <button type="submit" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent">
           Aplicar
         </button>
       </form>

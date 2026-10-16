@@ -2,12 +2,18 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Finanças da Casa",
-    short_name: "Finanças",
+    name: "Koda · Gestão Financeira Pessoal",
+    short_name: "Koda",
+    description: "Gestão Financeira Pessoal",
     start_url: "/",
     display: "standalone",
-    background_color: "#f6f7f9",
-    theme_color: "#f6f7f9",
+    background_color: "#0b0a09",
+    theme_color: "#0b0a09",
     lang: "pt-BR",
+    icons: [
+      { src: "/icone-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icone-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icone-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
   };
 }

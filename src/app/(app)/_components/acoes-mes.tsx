@@ -26,7 +26,7 @@ export function AcoesMes({ mes }: { mes: string }) {
           type="button"
           disabled={gerando}
           onClick={() => startTransition(async () => setMsg(await gerarMes(mes)))}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-60"
         >
           {gerando ? "Gerando..." : "Gerar contas do mês"}
         </button>
@@ -65,7 +65,7 @@ export function AcoesMes({ mes }: { mes: string }) {
           </label>
           {state.erro && <p className="text-sm text-negative sm:col-span-4">{state.erro}</p>}
           <div className="sm:col-span-4">
-            <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+            <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-60">
               {salvando ? "Adicionando..." : "Adicionar"}
             </button>
           </div>

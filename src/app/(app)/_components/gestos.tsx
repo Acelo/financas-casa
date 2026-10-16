@@ -278,7 +278,7 @@ export function Gestos({ children }: { children: React.ReactNode }) {
           <div
             className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm shadow-lg transition-colors ${
               vaiTrocar
-                ? "border-accent bg-accent text-white"
+                ? "border-accent bg-accent text-on-accent"
                 : "border-border bg-surface text-muted"
             }`}
           >

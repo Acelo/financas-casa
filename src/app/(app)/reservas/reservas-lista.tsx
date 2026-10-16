@@ -63,7 +63,7 @@ export function ReservasLista({
       <button
         type="button"
         onClick={() => setNova((n) => !n)}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent"
       >
         + Nova caixinha
       </button>
@@ -275,7 +275,7 @@ function useFormulario(
 function Acoes({ salvando, aoCancelar, rotulo = "Salvar" }: { salvando: boolean; aoCancelar: () => void; rotulo?: string }) {
   return (
     <div className="flex gap-2 sm:col-span-full">
-      <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+      <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-60">
         {salvando ? "Salvando..." : rotulo}
       </button>
       <button type="button" onClick={aoCancelar} className="rounded-lg border border-border px-4 py-2 text-sm">

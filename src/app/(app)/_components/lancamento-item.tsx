@@ -144,7 +144,7 @@ export function LancamentoItem({
           {state.erro && <p className="text-sm text-negative sm:col-span-2">{state.erro}</p>}
 
           <div className="flex gap-2 sm:col-span-2">
-            <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+            <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-60">
               {salvando ? "Salvando..." : "Salvar"}
             </button>
             <button type="button" onClick={() => setAberto(false)} className="rounded-lg border border-border px-4 py-2 text-sm">

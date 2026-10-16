@@ -33,7 +33,7 @@ export function JurosLista({
       <button
         type="button"
         onClick={() => setNovo((n) => !n)}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent"
       >
         + Lançar mês
       </button>
@@ -135,7 +135,7 @@ function FormJuros({
       {state.erro && <p className="text-sm text-negative sm:col-span-4">{state.erro}</p>}
 
       <div className="flex gap-2 sm:col-span-4">
-        <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+        <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-60">
           {salvando ? "Salvando..." : "Salvar"}
         </button>
         <button type="button" onClick={aoTerminar} className="rounded-lg border border-border px-4 py-2 text-sm">

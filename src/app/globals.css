@@ -1,29 +1,33 @@
 @import "tailwindcss";
 
+/* Identidade Koda: preto quente + dourado (escuro) / creme + dourado (claro) */
 :root {
-  --background: #f6f7f9;
+  --background: #f7f4ee;
   --surface: #ffffff;
-  --foreground: #171a1f;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --accent: #2563eb;
+  --foreground: #1c1915;
+  --muted: #6e675d;
+  --border: #e6dfd3;
+  --accent: #8f6220;
+  --on-accent: #ffffff;
+  --ouro-claro: #e9c88f;
+  --ouro: #c9955a;
   --positive: #15803d;
   --negative: #b91c1c;
   /* Gráficos (paleta validada para CVD contra estas superfícies) */
   --series-1: #2a78d6;
   --series-2: #eb6834;
-  --grid: #eceef1;
-  --axis: #c9ccd2;
-  /* Vidro (barra de abas) */
-  --vidro-fundo: rgba(255, 255, 255, 0.62);
-  --vidro-borda: rgba(15, 23, 42, 0.08);
+  --grid: #ece6db;
+  --axis: #cfc6b7;
+  /* Vidro */
+  --vidro-fundo: rgba(255, 252, 246, 0.66);
+  --vidro-borda: rgba(60, 44, 20, 0.1);
   --vidro-brilho: rgba(255, 255, 255, 0.95);
   --vidro-pilula-topo: rgba(255, 255, 255, 0.98);
-  --vidro-pilula-base: rgba(226, 232, 240, 0.7);
-  --vidro-sombra: rgba(15, 23, 42, 0.18);
-  --vidro-cartao: rgba(255, 255, 255, 0.66);
-  --brilho-1: rgba(59, 130, 246, 0.14);
-  --brilho-2: rgba(244, 114, 182, 0.08);
+  --vidro-pilula-base: rgba(240, 226, 202, 0.75);
+  --vidro-sombra: rgba(60, 44, 20, 0.18);
+  --vidro-cartao: rgba(255, 253, 249, 0.7);
+  --brilho-1: rgba(201, 149, 90, 0.14);
+  --brilho-2: rgba(233, 200, 143, 0.12);
 }
 
 @theme inline {
@@ -33,37 +37,41 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-ouro: var(--ouro);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-series-1: var(--series-1);
   --color-series-2: var(--series-2);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-marca: var(--font-cinzel);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0e1014;
-    --surface: #171a20;
-    --foreground: #e8eaed;
-    --muted: #9aa0a8;
-    --border: #2a2e36;
-    --accent: #60a5fa;
+    --background: #0b0a09;
+    --surface: #151412;
+    --foreground: #eee8df;
+    --muted: #9d958a;
+    --border: #2b2722;
+    --accent: #e3b56f;
+    --on-accent: #1a1206;
     --positive: #4ade80;
     --negative: #f87171;
     --series-1: #3987e5;
     --series-2: #d95926;
-    --grid: #252930;
-    --axis: #3a3f48;
-    --vidro-fundo: rgba(23, 26, 32, 0.55);
-    --vidro-borda: rgba(255, 255, 255, 0.1);
-    --vidro-brilho: rgba(255, 255, 255, 0.14);
-    --vidro-pilula-topo: rgba(255, 255, 255, 0.18);
-    --vidro-pilula-base: rgba(96, 165, 250, 0.1);
-    --vidro-sombra: rgba(0, 0, 0, 0.55);
-    --vidro-cartao: rgba(28, 32, 40, 0.55);
-    --brilho-1: rgba(59, 130, 246, 0.16);
-    --brilho-2: rgba(99, 102, 241, 0.1);
+    --grid: #26231f;
+    --axis: #3b362f;
+    --vidro-fundo: rgba(21, 20, 18, 0.58);
+    --vidro-borda: rgba(233, 200, 143, 0.12);
+    --vidro-brilho: rgba(255, 240, 215, 0.12);
+    --vidro-pilula-topo: rgba(255, 236, 205, 0.16);
+    --vidro-pilula-base: rgba(227, 181, 111, 0.1);
+    --vidro-sombra: rgba(0, 0, 0, 0.6);
+    --vidro-cartao: rgba(26, 24, 21, 0.58);
+    --brilho-1: rgba(227, 181, 111, 0.09);
+    --brilho-2: rgba(201, 149, 90, 0.06);
   }
 }
 
@@ -126,4 +134,29 @@ body::before {
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Dourado da marca em degradê (texto) e o botão principal da tela de login */
+:root {
+  --ouro-a: #b98a45;
+  --ouro-b: #7a5219;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ouro-a: #f1d29b;
+    --ouro-b: #c9955a;
+  }
+}
+.texto-ouro {
+  background: linear-gradient(180deg, var(--ouro-a), var(--ouro-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.botao-ouro {
+  background: linear-gradient(180deg, #f0d29d, #d3a160);
+  color: #1a1206;
+  box-shadow:
+    0 8px 24px -10px rgba(201, 149, 90, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }

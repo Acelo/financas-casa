@@ -89,7 +89,7 @@ export function RecorrentesLista({ contas, mes }: { contas: ContaView[]; mes: st
         <button
           type="button"
           onClick={() => setNova((n) => !n)}
-          className="ml-auto rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+          className="ml-auto rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent"
         >
           + Nova conta
         </button>
@@ -273,7 +273,7 @@ function FormConta({ conta, aoTerminar }: { conta?: ContaView; aoTerminar: () =>
       {state.erro && <p className="text-sm text-negative sm:col-span-4">{state.erro}</p>}
 
       <div className="flex gap-2 sm:col-span-4">
-        <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+        <button type="submit" disabled={salvando} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent disabled:opacity-60">
           {salvando ? "Salvando..." : conta ? "Salvar cadastro" : "Criar conta"}
         </button>
         <button type="button" onClick={aoTerminar} className="rounded-lg border border-border px-4 py-2 text-sm">
