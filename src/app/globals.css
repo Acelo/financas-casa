@@ -14,6 +14,13 @@
   --series-2: #eb6834;
   --grid: #eceef1;
   --axis: #c9ccd2;
+  /* Vidro (barra de abas) */
+  --vidro-fundo: rgba(255, 255, 255, 0.62);
+  --vidro-borda: rgba(15, 23, 42, 0.08);
+  --vidro-brilho: rgba(255, 255, 255, 0.95);
+  --vidro-pilula-topo: rgba(255, 255, 255, 0.98);
+  --vidro-pilula-base: rgba(226, 232, 240, 0.7);
+  --vidro-sombra: rgba(15, 23, 42, 0.18);
 }
 
 @theme inline {
@@ -45,7 +52,34 @@
     --series-2: #d95926;
     --grid: #252930;
     --axis: #3a3f48;
+    --vidro-fundo: rgba(23, 26, 32, 0.55);
+    --vidro-borda: rgba(255, 255, 255, 0.1);
+    --vidro-brilho: rgba(255, 255, 255, 0.14);
+    --vidro-pilula-topo: rgba(255, 255, 255, 0.18);
+    --vidro-pilula-base: rgba(96, 165, 250, 0.1);
+    --vidro-sombra: rgba(0, 0, 0, 0.55);
   }
+}
+
+/* "Liquid glass": fundo translúcido com desfoque, borda fina e um brilho
+   na aresta de cima, como vidro iluminado de cima */
+.vidro-barra {
+  background: var(--vidro-fundo);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--vidro-borda);
+  box-shadow:
+    0 12px 32px -12px var(--vidro-sombra),
+    inset 0 1px 0 var(--vidro-brilho);
+}
+
+.vidro-pilula {
+  background: linear-gradient(180deg, var(--vidro-pilula-topo), var(--vidro-pilula-base));
+  border: 1px solid var(--vidro-borda);
+  box-shadow:
+    0 6px 16px -6px var(--vidro-sombra),
+    inset 0 1px 0 var(--vidro-brilho),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
 }
 
 body {

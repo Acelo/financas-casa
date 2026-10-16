@@ -20,7 +20,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           </form>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 overflow-x-clip px-4 pt-6 pb-24 sm:pb-6">
+      <main className="mx-auto w-full max-w-5xl flex-1 overflow-x-clip px-4 pt-6 pb-32 sm:pb-6">
         <Gestos>{children}</Gestos>
       </main>
       <MenuRodape />
