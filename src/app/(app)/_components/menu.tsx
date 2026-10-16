@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { abas } from "@/lib/abas";
+
+// Ordem das abas: também é a ordem do deslizar para os lados no celular
+export const itens = [
+  { href: "/", label: "Contas do mês", curto: "Contas" },
+  { href: "/receitas", label: "Receitas", curto: "Receitas" },
+  { href: "/recorrentes", label: "Recorrentes", curto: "Fixos" },
+  { href: "/juros-obra", label: "Juros de obra", curto: "Juros" },
+  { href: "/reservas", label: "Reservas", curto: "Reservas" },
+  { href: "/dashboard", label: "Dashboard", curto: "Painel" },
+] as const;
 
 function useAtivo() {
   const path = usePathname();
@@ -14,7 +23,7 @@ export function MenuTopo() {
   const ativo = useAtivo();
   return (
     <nav className="hidden flex-1 gap-1 text-sm sm:flex">
-      {abas.map((item) => (
+      {itens.map((item) => (
         <Link
           key={item.href}
           href={item.href}
@@ -37,7 +46,7 @@ export function MenuRodape() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden">
       <div className="grid grid-cols-6">
-        {abas.map((item) => (
+        {itens.map((item) => (
           <Link
             key={item.href}
             href={item.href}

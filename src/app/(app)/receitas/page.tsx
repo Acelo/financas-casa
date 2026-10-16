@@ -1,5 +1,132 @@
-import { Carrossel } from "../_components/carrossel";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { competenciaParaData, formatBRL, lerMes, somarMeses } from "@/lib/format";
+import { MesNav, Resumo } from "../_components/mes-nav";
+import { NovaReceita, ReceitaItem, type ReceitaView } from "./receita-form";
 
-export default function Page({ searchParams }: PageProps<"/receitas">) {
-  return <Carrossel aba="/receitas" searchParams={searchParams} />;
+export default async function Receitas({ searchParams }: PageProps<"/receitas">) {
+  const mes = lerMes((await searchParams).mes);
+  const competencia = competenciaParaData(mes);
+  const supabase = await createClient();
+
+  const [receitasRes, membrosRes, contasRes, reservasRes] = await Promise.all([
+    supabase
+      .from("receitas")
+      .select("id, pessoa, tipo, descricao, valor")
+      .eq("competencia", competencia)
+      .order("tipo", { ascending: false })
+      .order("pessoa")
+      .returns<ReceitaView[]>(),
+    supabase.from("membros").select("nome").order("nome"),
+    supabase
+      .from("lancamentos")
+      .select("valor_previsto, valor_pago")
+      .eq("competencia", competencia),
+    supabase
+      .from("reserva_movimentos")
+      .select("tipo, valor")
+      .in("tipo", ["aporte", "resgate"])
+      .gte("data", competencia)
+      .lt("data", competenciaParaData(somarMeses(mes, 1))),
+  ]);
+
+  const erro = receitasRes.error ?? membrosRes.error ?? contasRes.error ?? reservasRes.error;
+  const somaReserva = (tipo: string) =>
+    (reservasRes.data ?? []).filter((m) => m.tipo === tipo).reduce((s, m) => s + Number(m.valor), 0);
+  const resgatado = somaReserva("resgate");
+  const guardado = somaReserva("aporte");
+  const receitas = receitasRes.data ?? [];
+  const pessoas = [...(membrosRes.data ?? []).map((m) => m.nome as string), "Outro"];
+
+  const totalReceitas = receitas.reduce((s, r) => s + Number(r.valor), 0);
+  // Conta paga vale o valor pago; pendente vale o previsto
+  const totalContas = (contasRes.data ?? []).reduce(
+    (s, l) => s + Number(l.valor_pago ?? l.valor_previsto),
+    0,
+  );
+  const saldo = totalReceitas - totalContas;
+
+  const porPessoa = new Map<string, { salario: number; extra: number }>();
+  for (const r of receitas) {
+    const p = porPessoa.get(r.pessoa) ?? { salario: 0, extra: 0 };
+    p[r.tipo] += Number(r.valor);
+    porPessoa.set(r.pessoa, p);
+  }
+
+  return (
+    <div className="space-y-6">
+      <MesNav mes={mes} base="/receitas" />
+
+      {erro && (
+        <p className="rounded-lg border border-negative/40 p-3 text-sm text-negative">
+          Erro ao carregar: {erro.message}
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Resumo titulo="Receitas" valor={formatBRL(totalReceitas)} cor="positivo" />
+        <Resumo titulo="Contas do mês" valor={formatBRL(totalContas)} />
+        <Resumo
+          titulo={saldo >= 0 ? "Sobra" : "Falta"}
+          valor={formatBRL(saldo)}
+          cor={saldo >= 0 ? "positivo" : "negativo"}
+          className="col-span-2 sm:col-span-1"
+        />
+      </div>
+
+      {/* Reservas: só mostra, não altera o saldo do mês */}
+      {(resgatado > 0 || guardado > 0 || saldo > 0) && (
+        <div className="space-y-1 rounded-xl border border-border bg-surface p-3 text-sm">
+          {resgatado > 0 && (
+            <p>
+              Resgatado das reservas no mês: <span className="font-medium">{formatBRL(resgatado)}</span>
+              {saldo < 0 && (
+                <span className={saldo + resgatado >= 0 ? "text-positive" : "text-negative"}>
+                  {" "}
+                  · {saldo + resgatado >= 0 ? "a falta foi coberta" : `ainda faltam ${formatBRL(-(saldo + resgatado))}`}
+                </span>
+              )}
+            </p>
+          )}
+          {guardado > 0 && (
+            <p>
+              Guardado nas reservas no mês: <span className="font-medium">{formatBRL(guardado)}</span>
+            </p>
+          )}
+          {saldo - guardado > 0.009 && (
+            <Link
+              href={`/reservas?aporte=${(saldo - guardado).toFixed(2)}`}
+              className="inline-block pt-1 font-medium text-accent hover:underline"
+            >
+              Guardar {formatBRL(saldo - guardado)} da sobra na reserva →
+            </Link>
+          )}        </div>
+      )}
+
+      {porPessoa.size > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[...porPessoa].map(([pessoa, v]) => (
+            <div key={pessoa} className="rounded-xl border border-border bg-surface p-3 text-sm">
+              <p className="font-medium">{pessoa}</p>
+              <p className="text-muted">
+                Salário {formatBRL(v.salario)} · Extras {formatBRL(v.extra)}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <NovaReceita key={`nova-${mes}`}mes={mes} pessoas={pessoas} />
+
+      {receitas.length === 0 && !erro ? (
+        <p className="text-sm text-muted">Nenhuma receita lançada neste mês.</p>
+      ) : (
+        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+          {receitas.map((r) => (
+            <ReceitaItem key={r.id} r={r} mes={mes} pessoas={pessoas} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
