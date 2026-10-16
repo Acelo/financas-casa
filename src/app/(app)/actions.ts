@@ -17,7 +17,14 @@ export async function salvarLancamento(
   const valorPago = lerValor(formData.get("valor_pago"));
   const dataPagamento = String(formData.get("data_pagamento") ?? "") || null;
   const obs = String(formData.get("obs") ?? "").trim() || null;
+  // Só vem no formulário de contas parceladas
+  const temParcela = formData.has("parcela");
+  const parcelaTexto = String(formData.get("parcela") ?? "").trim();
+  const parcela = parcelaTexto ? Number(parcelaTexto) : null;
 
+  if (temParcela && parcela !== null && (!Number.isInteger(parcela) || parcela < 1)) {
+    return { erro: "Número da parcela inválido." };
+  }
   if (Number.isNaN(valorPrevisto) || Number.isNaN(valorPago)) {
     return { erro: "Valor inválido." };
   }
@@ -35,6 +42,7 @@ export async function salvarLancamento(
       valor_pago: pago ? (valorPago ?? valorPrevisto) : null,
       data_pagamento: pago ? (dataPagamento ?? hoje()) : null,
       obs,
+      ...(temParcela ? { parcela } : {}),
     })
     .eq("id", id);
 

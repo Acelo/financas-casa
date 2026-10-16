@@ -136,7 +136,22 @@ export function LancamentoItem({
             <span className="text-xs text-muted">Data do pagamento</span>
             <input name="data_pagamento" type="date" defaultValue={l.data_pagamento ?? ""} className={campo} />
           </label>
-          <label className="space-y-1 sm:col-span-2">
+          {/* Corrige a contagem: os meses seguintes continuam a partir daqui */}
+          {l.contas.parcelas_totais && (
+            <label className="space-y-1">
+              <span className="text-xs text-muted">Parcela nº (de {l.contas.parcelas_totais})</span>
+              <input
+                name="parcela"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={l.contas.parcelas_totais}
+                defaultValue={l.parcela ?? ""}
+                className={campo}
+              />
+            </label>
+          )}
+          <label className={`space-y-1 ${l.contas.parcelas_totais ? "" : "sm:col-span-2"}`}>
             <span className="text-xs text-muted">Observação</span>
             <input name="obs" defaultValue={l.obs ?? ""} className={campo} />
           </label>
