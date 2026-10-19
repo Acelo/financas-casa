@@ -11,6 +11,7 @@ import {
 } from "@/lib/reservas";
 import { valorParaInput } from "@/lib/valores";
 import type { Resultado } from "../actions";
+import { CampoValor } from "../_components/campo-valor";
 import {
   atualizarSaldo,
   excluirMovimento,
@@ -310,7 +311,7 @@ function FormMovimento({
       {movimento && <input type="hidden" name="id" value={movimento.id} />}
       <label className="space-y-1">
         <span className="text-xs text-muted">Valor {tipo === "resgate" ? "resgatado" : tipo === "aporte" ? "aplicado" : ""}</span>
-        <input name="valor" required inputMode="decimal" placeholder="0,00" defaultValue={valorPadrao} className={campo} />
+        <CampoValor name="valor" required placeholder="0,00" defaultValue={valorPadrao} className={campo} />
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Data</span>
@@ -328,9 +329,8 @@ function FormMovimento({
       {tipo === "saldo_inicial" && (
         <label className="space-y-1">
           <span className="text-xs text-muted">Saldo líquido (opcional)</span>
-          <input
+          <CampoValor
             name="saldo_liquido"
-            inputMode="decimal"
             defaultValue={movimento?.valor_liquido != null ? valorParaInput(movimento.valor_liquido) : ""}
             className={campo}
           />
@@ -353,17 +353,16 @@ function FormAtualizar({ r, hoje, aoTerminar }: { r: ReservaView; hoje: string; 
       </p>
       <label className="space-y-1">
         <span className="text-xs text-muted">Saldo bruto no banco</span>
-        <input
+        <CampoValor
           name="saldo_real"
           required
-          inputMode="decimal"
           defaultValue={r.estimativa ? valorParaInput(r.estimativa.estimado) : ""}
           className={campo}
         />
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Saldo líquido no banco (opcional)</span>
-        <input name="saldo_liquido" inputMode="decimal" className={campo} />
+        <CampoValor name="saldo_liquido" className={campo} />
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Data</span>
@@ -418,11 +417,11 @@ function FormReserva({ reserva, hoje, aoTerminar }: { reserva?: ReservaView; hoj
         <>
           <label className="space-y-1">
             <span className="text-xs text-muted">Saldo bruto atual</span>
-            <input name="saldo_inicial" required inputMode="decimal" placeholder="0,00" className={campo} />
+            <CampoValor name="saldo_inicial" required placeholder="0,00" className={campo} />
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Saldo líquido (opcional)</span>
-            <input name="saldo_liquido" inputMode="decimal" placeholder="0,00" className={campo} />
+            <CampoValor name="saldo_liquido" placeholder="0,00" className={campo} />
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Saldo na data</span>

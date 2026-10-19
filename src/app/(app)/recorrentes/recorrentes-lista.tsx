@@ -7,6 +7,7 @@ import { IconeCategoria } from "../_components/icones";
 import { Resumo } from "../_components/mes-nav";
 import type { Resultado } from "../actions";
 import { alternarAtivo, reajustarValor, salvarConta } from "./actions";
+import { CampoValor } from "../_components/campo-valor";
 
 export type ContaView = {
   id: string;
@@ -232,7 +233,7 @@ function FormConta({ conta, aoTerminar }: { conta?: ContaView; aoTerminar: () =>
       {!conta && (
         <label className="space-y-1">
           <span className="text-xs text-muted">Valor</span>
-          <input name="valor" required inputMode="decimal" placeholder="0,00" className={campo} />
+          <CampoValor name="valor" required placeholder="0,00" className={campo} />
         </label>
       )}
       <label className="space-y-1">
@@ -293,7 +294,7 @@ function FormReajuste({ conta, mes }: { conta: ContaView; mes: string }) {
       <p className="text-sm font-medium sm:col-span-4">Reajuste de valor</p>
       <label className="space-y-1">
         <span className="text-xs text-muted">Novo valor</span>
-        <input name="valor" required inputMode="decimal" defaultValue={valorParaInput(conta.valor_atual)} className={campo} />
+        <CampoValor name="valor" required defaultValue={valorParaInput(conta.valor_atual)} className={campo} />
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">A partir de</span>

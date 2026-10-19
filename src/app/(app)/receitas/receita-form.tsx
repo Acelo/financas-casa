@@ -5,6 +5,7 @@ import { formatBRL } from "@/lib/format";
 import { valorParaInput } from "@/lib/valores";
 import type { Resultado } from "../actions";
 import { copiarSalarios, excluirReceita, salvarReceita } from "./actions";
+import { CampoValor } from "../_components/campo-valor";
 
 export type ReceitaView = {
   id: string;
@@ -60,7 +61,7 @@ function Formulario({
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Valor</span>
-        <input name="valor" required inputMode="decimal" placeholder="0,00" defaultValue={receita ? valorParaInput(receita.valor) : ""} className={campo} />
+        <CampoValor name="valor" required placeholder="0,00" defaultValue={receita ? valorParaInput(receita.valor) : ""} className={campo} />
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Descrição</span>

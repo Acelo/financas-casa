@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { formatBRL } from "@/lib/format";
 import { valorParaInput } from "@/lib/valores";
+import { CampoValor } from "./campo-valor";
 import {
   excluirLancamento,
   marcarPago,
@@ -119,11 +120,11 @@ export function LancamentoItem({
 
           <label className="space-y-1">
             <span className="text-xs text-muted">Valor previsto</span>
-            <input name="valor_previsto" inputMode="decimal" defaultValue={valorParaInput(l.valor_previsto)} className={campo} />
+            <CampoValor name="valor_previsto" defaultValue={valorParaInput(l.valor_previsto)} className={campo} />
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Valor pago</span>
-            <input name="valor_pago" inputMode="decimal" defaultValue={valorParaInput(l.valor_pago)} placeholder="igual ao previsto" className={campo} />
+            <CampoValor name="valor_pago" defaultValue={valorParaInput(l.valor_pago)} placeholder="igual ao previsto" className={campo} />
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Status</span>

@@ -5,6 +5,7 @@ import { formatBRL, nomeDoMes } from "@/lib/format";
 import { valorParaInput } from "@/lib/valores";
 import type { Resultado } from "../actions";
 import { excluirJuros, salvarJuros } from "./actions";
+import { CampoValor } from "../_components/campo-valor";
 
 export type JurosView = {
   competencia: string;
@@ -121,7 +122,7 @@ function FormJuros({
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Valor</span>
-        <input name="valor" required inputMode="decimal" placeholder="0,00" defaultValue={registro ? valorParaInput(registro.valor) : ""} className={campo} />
+        <CampoValor name="valor" required placeholder="0,00" defaultValue={registro ? valorParaInput(registro.valor) : ""} className={campo} />
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Data do pagamento</span>

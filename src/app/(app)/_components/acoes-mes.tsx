@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { adicionarAvulso, gerarMes, type Resultado } from "../actions";
+import { CampoValor } from "./campo-valor";
 
 const campo =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-base outline-none focus:border-accent";
@@ -58,7 +59,7 @@ export function AcoesMes({ mes }: { mes: string }) {
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Valor</span>
-            <input name="valor" required inputMode="decimal" placeholder="0,00" className={campo} />
+            <CampoValor name="valor" required placeholder="0,00" className={campo} />
           </label>
           <label className="flex items-center gap-2 text-sm sm:col-span-4">
             <input type="checkbox" name="pago" defaultChecked /> Já está pago
