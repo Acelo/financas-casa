@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { sair } from "../login/actions";
 import { Gestos } from "./_components/gestos";
+import { LinkAviso } from "./_components/link-aviso";
 import { MenuRodape, MenuTopo } from "./_components/menu";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
@@ -8,13 +8,13 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
     <div className="flex flex-1 flex-col">
       <header className="vidro-cabecalho sticky top-0 z-10 pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
-          <Link href="/" aria-label="Koda, início" className="texto-ouro flex-1 font-marca text-xl font-semibold tracking-[0.16em] sm:flex-none">
+          <LinkAviso href="/" rotulo="Menu" aria-label="Koda, início" className="texto-ouro flex-1 font-marca text-xl font-semibold tracking-[0.16em] sm:flex-none">
             KODA
-          </Link>
+          </LinkAviso>
           <MenuTopo />
-          <Link href="/backup" className="text-sm text-muted hover:text-foreground">
+          <LinkAviso href="/backup" rotulo="Backup" className="text-sm text-muted hover:text-foreground">
             Backup
-          </Link>
+          </LinkAviso>
           <form action={sair}>
             <button className="text-sm text-muted hover:text-foreground">
               Sair

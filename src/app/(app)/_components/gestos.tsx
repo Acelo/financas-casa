@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { limparAviso, useAvisoNavegacao } from "./aviso-navegacao";
 import { itens } from "./menu";
 
 // Gestos do celular:
@@ -65,6 +66,8 @@ export function Gestos({ children }: { children: React.ReactNode }) {
   // Deslize em andamento: quanto andou e para qual aba vai (null = não há)
   const [deslize, setDeslize] = useState<{ dx: number; destino: string | null } | null>(null);
   const [indo, setIndo] = useState<string | null>(null);
+  // "Abrindo …" disparado por toque em link (menus, atalhos, KODA)
+  const aviso = useAvisoNavegacao();
   const conteudo = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   // Sentido da troca em andamento: 1 = próxima aba, -1 = anterior
@@ -84,6 +87,8 @@ export function Gestos({ children }: { children: React.ReactNode }) {
   // Nova aba chegou: ela entra pelo lado de onde veio o gesto (ou, num
   // toque no menu, pelo lado da posição dela na barra)
   useEffect(() => {
+    // A tela nova chegou: some o aviso de "Abrindo …"
+    limparAviso();
     const anterior = caminhoAnterior.current;
     caminhoAnterior.current = pathname;
     const el = conteudo.current;
@@ -237,16 +242,18 @@ export function Gestos({ children }: { children: React.ReactNode }) {
     };
   }, [router]);
 
-  const visivel = recarregando || puxado > 0 || trocando;
+  const visivel = recarregando || puxado > 0 || trocando || aviso !== null;
   const pronto = puxado >= PUXAR_LIMITE;
   const texto = trocando
     ? `Abrindo ${indo ?? ""}...`
+    : aviso !== null
+      ? `Abrindo ${aviso}...`
     : recarregando
       ? "Atualizando..."
       : pronto
         ? "Solte para atualizar"
         : "Puxe para atualizar";
-  const girando = recarregando || trocando;
+  const girando = recarregando || trocando || aviso !== null;
 
   // Indicador lateral: aparece do lado de onde a próxima aba "entra"
   const progresso = deslize ? Math.min(Math.abs(deslize.dx) / DESLIZAR_MIN, 1) : 0;

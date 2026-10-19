@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { competenciaParaData, formatBRL, mesAtual, nomeDoMes } from "@/lib/format";
 import { comSinal } from "@/lib/reservas";
 import { icones } from "./_components/icones";
+import { LinkAviso } from "./_components/link-aviso";
 
 // Tela inicial: um resumo do mês e um atalho para cada aba. Não tem barra
 // de abas nem deslizar para os lados (os atalhos já são o menu).
@@ -10,6 +10,7 @@ import { icones } from "./_components/icones";
 type Atalho = {
   href: "/contas" | "/receitas" | "/recorrentes" | "/juros-obra" | "/reservas" | "/dashboard";
   titulo: string;
+  curto: string;
   destaque: string;
   detalhe: string;
   tom?: "positivo" | "negativo";
@@ -56,6 +57,7 @@ export default async function Inicio() {
   const atalhos: Atalho[] = [
     {
       href: "/contas",
+      curto: "Contas",
       titulo: "Contas do mês",
       destaque: lancs.length ? formatBRL(faltaPagar) : "—",
       detalhe: lancs.length
@@ -67,30 +69,35 @@ export default async function Inicio() {
     },
     {
       href: "/receitas",
+      curto: "Receitas",
       titulo: "Receitas",
       destaque: formatBRL(receitas),
       detalhe: receitas ? "entrou este mês" : "nada lançado ainda",
     },
     {
       href: "/recorrentes",
+      curto: "Fixos",
       titulo: "Recorrentes",
       destaque: `${fixosRes.count ?? 0}`,
       detalhe: "contas e assinaturas ativas",
     },
     {
       href: "/juros-obra",
+      curto: "Juros",
       titulo: "Juros de obra",
       destaque: juros ? formatBRL(juros.valor) : "—",
       detalhe: juros ? `último: ${nomeDoMes(juros.competencia.slice(0, 7)).toLowerCase()}` : "nenhum mês lançado",
     },
     {
       href: "/reservas",
+      curto: "Reservas",
       titulo: "Reservas",
       destaque: formatBRL(reserva),
       detalhe: "saldo registrado",
     },
     {
       href: "/dashboard",
+      curto: "Painel",
       titulo: "Dashboard",
       destaque: "Gráficos",
       detalhe: "histórico e evolução",
@@ -108,7 +115,7 @@ export default async function Inicio() {
       </section>
 
       {/* Fechamento do mês: receitas menos contas */}
-      <Link href="/receitas" className="vidro block rounded-2xl p-5 transition-transform active:scale-[0.99]">
+      <LinkAviso href="/receitas" rotulo="Receitas" className="vidro block rounded-2xl p-5 transition-transform active:scale-[0.99]">
         <p className="text-xs text-muted">{saldo >= 0 ? "Sobra do mês" : "Falta no mês"}</p>
         <p className={`text-3xl font-semibold ${saldo >= 0 ? "text-positive" : "text-negative"}`}>
           {formatBRL(saldo)}
@@ -116,15 +123,16 @@ export default async function Inicio() {
         <p className="mt-1 text-xs text-muted">
           Receitas {formatBRL(receitas)} · Contas {formatBRL(totalContas)}
         </p>
-      </Link>
+      </LinkAviso>
 
       <nav aria-label="Atalhos" className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {atalhos.map((a) => {
           const Icone = icones[a.href];
           return (
-            <Link
+            <LinkAviso
               key={a.href}
               href={a.href}
+              rotulo={a.curto}
               className="vidro group flex min-h-36 flex-col rounded-2xl p-4 transition-transform active:scale-[0.98]"
             >
               <span className="vidro-pilula mb-3 flex size-10 items-center justify-center rounded-xl text-accent">
@@ -139,7 +147,7 @@ export default async function Inicio() {
                 {a.destaque}
               </span>
               <span className="text-xs text-muted">{a.detalhe}</span>
-            </Link>
+            </LinkAviso>
           );
         })}
       </nav>

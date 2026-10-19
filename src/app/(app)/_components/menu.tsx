@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { avisarAbrindo } from "./aviso-navegacao";
 import { icones } from "./icones";
 
 // Ordem das abas: também é a ordem do deslizar para os lados no celular
@@ -33,6 +34,7 @@ export function MenuTopo() {
           <Link
             key={item.href}
             href={item.href}
+            onClick={() => avisarAbrindo(item.curto, item.href)}
             className={`flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 ${
               i === ativo
                 ? "bg-background font-medium text-foreground"
@@ -92,7 +94,10 @@ export function MenuRodape() {
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setTocado(i)}
+              onClick={() => {
+                setTocado(i);
+                avisarAbrindo(item.curto, item.href);
+              }}
               aria-current={i === ativo ? "page" : undefined}
               className={`relative flex flex-col items-center gap-1 rounded-[20px] py-2 transition-colors duration-300 ${
                 ehAtivo ? "text-foreground" : "text-muted"
