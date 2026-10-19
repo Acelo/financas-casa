@@ -114,8 +114,8 @@ export function TelaMarca({ subtitulo = "Gestão Financeira Pessoal", children }
         aria-hidden
         className="pointer-events-none absolute inset-y-0 left-0 hidden bg-left bg-no-repeat sm:block"
         style={{
-          width: "calc(100dvh * 484 / 1024)",
-          backgroundImage: "url(/koda-arte.jpg)",
+          width: "calc(100dvh * 941 / 1672)",
+          backgroundImage: "url(/koda-arte.webp)",
           backgroundSize: "auto 100%",
           maskImage: "linear-gradient(90deg, #000 30%, rgba(0,0,0,0.5) 65%, transparent 96%)",
           WebkitMaskImage: "linear-gradient(90deg, #000 30%, rgba(0,0,0,0.5) 65%, transparent 96%)",
@@ -123,9 +123,9 @@ export function TelaMarca({ subtitulo = "Gestão Financeira Pessoal", children }
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[68%] bg-cover bg-top opacity-60 sm:hidden"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[78%] bg-cover bg-top opacity-60 sm:hidden"
         style={{
-          backgroundImage: "url(/koda-arte.jpg)",
+          backgroundImage: "url(/koda-arte.webp)",
           maskImage: "linear-gradient(180deg, #000 35%, transparent 100%)",
           WebkitMaskImage: "linear-gradient(180deg, #000 35%, transparent 100%)",
         }}
