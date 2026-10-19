@@ -1,0 +1,30 @@
+<!--
+  Modelo do e-mail "Reset Password" da Supabase (Authentication → Emails).
+  Assunto sugerido: Koda · Redefinir sua senha
+  O link usa token_hash (e não o padrão da Supabase) para funcionar mesmo
+  abrindo o e-mail em outro aparelho. Precisa do Site URL configurado como
+  https://koda-financas.vercel.app
+-->
+<div style="margin:0;padding:32px 16px;background:#0b0a09;font-family:Helvetica,Arial,sans-serif;color:#eee8df">
+  <div style="max-width:440px;margin:0 auto;text-align:center">
+    <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:40px;letter-spacing:4px;color:#e3b56f">KODA</p>
+    <div style="width:64px;height:1px;margin:12px auto 0;background:#c9955a"></div>
+    <p style="margin:12px 0 32px;font-size:13px;letter-spacing:3px;color:#cfc6b8">Gestão Financeira Pessoal</p>
+
+    <div style="padding:28px 24px;border:1px solid #3a3226;border-radius:16px;background:#151412;text-align:left">
+      <p style="margin:0 0 12px;font-size:16px;color:#eee8df">Olá!</p>
+      <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#cfc6b8">
+        Recebemos um pedido para redefinir a senha da sua conta no Koda.
+        Toque no botão abaixo para criar uma nova senha.
+      </p>
+      <a href="{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery&next=/redefinir-senha"
+         style="display:block;padding:14px 0;border-radius:12px;background:#e3b56f;color:#1a1206;font-size:15px;font-weight:bold;text-align:center;text-decoration:none">
+        Criar nova senha
+      </a>
+      <p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:#8a8276">
+        O link vale por 1 hora e só pode ser usado uma vez.
+        Se você não pediu isso, pode ignorar este e-mail: sua senha continua a mesma.
+      </p>
+    </div>
+  </div>
+</div>

@@ -32,6 +32,8 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isLogin = request.nextUrl.pathname.startsWith("/login");
+  // Link do e-mail de redefinição de senha: chega sem sessão e cria uma
+  if (request.nextUrl.pathname.startsWith("/auth/")) return response;
 
   if (!user && !isLogin) {
     return NextResponse.redirect(new URL("/login", request.url));

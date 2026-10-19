@@ -2,6 +2,7 @@
 
 /* Identidade Koda: preto quente + dourado (escuro) / creme + dourado (claro) */
 :root {
+  color-scheme: light;
   --background: #f7f4ee;
   --surface: #ffffff;
   --foreground: #1c1915;
@@ -48,31 +49,30 @@
   --font-marca: var(--font-cinzel);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b0a09;
-    --surface: #151412;
-    --foreground: #eee8df;
-    --muted: #9d958a;
-    --border: #2b2722;
-    --accent: #e3b56f;
-    --on-accent: #1a1206;
-    --positive: #4ade80;
-    --negative: #f87171;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --grid: #26231f;
-    --axis: #3b362f;
-    --vidro-fundo: rgba(21, 20, 18, 0.58);
-    --vidro-borda: rgba(233, 200, 143, 0.12);
-    --vidro-brilho: rgba(255, 240, 215, 0.12);
-    --vidro-pilula-topo: rgba(255, 236, 205, 0.16);
-    --vidro-pilula-base: rgba(227, 181, 111, 0.1);
-    --vidro-sombra: rgba(0, 0, 0, 0.6);
-    --vidro-cartao: rgba(26, 24, 21, 0.58);
-    --brilho-1: rgba(227, 181, 111, 0.09);
-    --brilho-2: rgba(201, 149, 90, 0.06);
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0b0a09;
+  --surface: #151412;
+  --foreground: #eee8df;
+  --muted: #9d958a;
+  --border: #2b2722;
+  --accent: #e3b56f;
+  --on-accent: #1a1206;
+  --positive: #4ade80;
+  --negative: #f87171;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --grid: #26231f;
+  --axis: #3b362f;
+  --vidro-fundo: rgba(21, 20, 18, 0.58);
+  --vidro-borda: rgba(233, 200, 143, 0.12);
+  --vidro-brilho: rgba(255, 240, 215, 0.12);
+  --vidro-pilula-topo: rgba(255, 236, 205, 0.16);
+  --vidro-pilula-base: rgba(227, 181, 111, 0.1);
+  --vidro-sombra: rgba(0, 0, 0, 0.6);
+  --vidro-cartao: rgba(26, 24, 21, 0.58);
+  --brilho-1: rgba(227, 181, 111, 0.09);
+  --brilho-2: rgba(201, 149, 90, 0.06);
 }
 
 /* Fundo com brilhos suaves: é o que o vidro "desfoca" e o que dá
@@ -141,11 +141,9 @@ body {
   --ouro-a: #b98a45;
   --ouro-b: #7a5219;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ouro-a: #f1d29b;
-    --ouro-b: #c9955a;
-  }
+:root[data-theme="dark"] {
+  --ouro-a: #f1d29b;
+  --ouro-b: #c9955a;
 }
 .texto-ouro {
   background: linear-gradient(180deg, var(--ouro-a), var(--ouro-b));
@@ -159,4 +157,16 @@ body {
   box-shadow:
     0 8px 24px -10px rgba(201, 149, 90, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* Gaveta do menu do usuário: vidro mais encorpado, para o fundo
+   escurecido atrás não acinzentar o menu no tema claro */
+.vidro-gaveta {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid var(--vidro-borda);
+  box-shadow:
+    12px 0 40px -12px var(--vidro-sombra),
+    inset -1px 0 0 var(--vidro-brilho);
 }
