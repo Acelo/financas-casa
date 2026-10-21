@@ -1,5 +1,6 @@
 # Backup semanal do banco da Supabase.
-# Gera um dump SQL do schema public (estrutura + dados), comprime e guarda no
+# Gera um dump SQL do schema public (estrutura, dados e permissões GRANT, que
+# a Supabase passou a exigir em tabelas novas), comprime e guarda no
 # ramo "backups" deste repositório. Registra a execução em public.backups para
 # o app mostrar a data/hora do último backup.
 #
@@ -46,7 +47,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/out"
           # pg_dump precisa ser da mesma versão (ou maior) que o servidor
           docker run --rm -e DB_URL -v "$RUNNER_TEMP/out:/out" "postgres:$PG_MAJOR" \
-            sh -c 'pg_dump "$DB_URL" --schema=public --no-owner --no-privileges --file=/out/backup.sql'
+            sh -c 'pg_dump "$DB_URL" --schema=public --no-owner --file=/out/backup.sql'
           CARIMBO=$(TZ=America/Sao_Paulo date +%Y-%m-%d_%H%M)
           gzip -9 -c "$RUNNER_TEMP/out/backup.sql" > "$RUNNER_TEMP/out/$CARIMBO.sql.gz"
           echo "ARQUIVO=$CARIMBO.sql.gz" >> "$GITHUB_ENV"
