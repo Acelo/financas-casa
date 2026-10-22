@@ -55,6 +55,9 @@ export function LancamentoItem({
   );
 
   const pago = l.status === "pago";
+  // Dia que vale neste mês: o alterado só aqui ou o do cadastro
+  const vencEfetivo = vencimentoEfetivo(l.competencia, l.vencimento, l.contas.dia_vencimento);
+  const diaEfetivo = vencEfetivo ? Number(vencEfetivo.slice(8)) : null;
   const diferenca =
     pago && l.valor_pago !== null
       ? Number(l.valor_pago) - Number(l.valor_previsto)
@@ -143,11 +146,15 @@ export function LancamentoItem({
           </label>
           {/* Vencimento: muda só este mês, ou também o cadastro (próximos meses) */}
           <label className="space-y-1">
-            <span className="text-xs text-muted">Vencimento</span>
+            <span className="text-xs text-muted">Dia do vencimento</span>
             <input
-              name="vencimento"
-              type="date"
-              defaultValue={vencimentoEfetivo(l.competencia, l.vencimento, l.contas.dia_vencimento) ?? ""}
+              name="dia_vencimento"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={31}
+              placeholder="sem dia"
+              defaultValue={diaEfetivo ?? ""}
               className={campo}
             />
           </label>

@@ -22,10 +22,14 @@ export async function salvarLancamento(
   const temParcela = formData.has("parcela");
   const parcelaTexto = String(formData.get("parcela") ?? "").trim();
   const parcela = parcelaTexto ? Number(parcelaTexto) : null;
-  const vencimentoTexto = String(formData.get("vencimento") ?? "");
-  const vencimentoInformado = /^d{4}-d{2}-d{2}$/.test(vencimentoTexto) ? vencimentoTexto : null;
+  // Dia do vencimento (1 a 31); vazio = conta sem dia
+  const diaTexto = String(formData.get("dia_vencimento") ?? "").trim();
+  const diaInformado = diaTexto ? Number(diaTexto) : null;
   const vencimentoProximos = formData.get("vencimento_proximos") === "on";
 
+  if (diaInformado !== null && (!Number.isInteger(diaInformado) || diaInformado < 1 || diaInformado > 31)) {
+    return { erro: "Dia do vencimento deve ser de 1 a 31." };
+  }
   if (temParcela && parcela !== null && (!Number.isInteger(parcela) || parcela < 1)) {
     return { erro: "Número da parcela inválido." };
   }
@@ -49,20 +53,21 @@ export async function salvarLancamento(
   if (erroLeitura) return { erro: erroLeitura.message };
 
   let diaCadastro = atual.contas.dia_vencimento;
-  if (vencimentoProximos && vencimentoInformado) {
-    diaCadastro = Number(vencimentoInformado.slice(8));
+  if (vencimentoProximos && diaInformado !== diaCadastro) {
+    diaCadastro = diaInformado;
     const { error: e2 } = await supabase
       .from("contas")
       .update({ dia_vencimento: diaCadastro })
       .eq("id", atual.conta_id);
     if (e2) return { erro: e2.message };
   }
+  // Mesmo dia do cadastro: não guarda nada (o mês segue o cadastro)
   const vencimento =
-    vencimentoInformado && vencimentoInformado !== vencimentoPadrao(atual.competencia, diaCadastro)
-      ? vencimentoInformado
+    diaInformado !== null && diaInformado !== diaCadastro
+      ? vencimentoPadrao(atual.competencia, diaInformado)
       : null;
 
-  const { error } = await supabase
+  const { data: gravado, error } = await supabase
     .from("lancamentos")
     .update({
       status,
@@ -73,9 +78,16 @@ export async function salvarLancamento(
       vencimento,
       ...(temParcela ? { parcela } : {}),
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select("vencimento")
+    .maybeSingle();
 
   if (error) return { erro: error.message };
+  // Confere que a linha foi mesmo gravada (sem isso, uma falha silenciosa
+  // parecia "salvo" e a tela voltava ao valor antigo)
+  if (!gravado || (gravado.vencimento ?? null) !== vencimento) {
+    return { erro: "Não foi possível salvar. Atualize a página e tente de novo." };
+  }
   refresh();
   return { ok: "Salvo." };
 }
