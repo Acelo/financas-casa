@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { competenciaParaData } from "@/lib/format";
 import { hoje, lerValor } from "@/lib/valores";
+import { vencimentoPadrao } from "@/lib/vencimento";
 
 export type Resultado = { erro?: string; ok?: string };
 
@@ -21,6 +22,9 @@ export async function salvarLancamento(
   const temParcela = formData.has("parcela");
   const parcelaTexto = String(formData.get("parcela") ?? "").trim();
   const parcela = parcelaTexto ? Number(parcelaTexto) : null;
+  const vencimentoTexto = String(formData.get("vencimento") ?? "");
+  const vencimentoInformado = /^d{4}-d{2}-d{2}$/.test(vencimentoTexto) ? vencimentoTexto : null;
+  const vencimentoProximos = formData.get("vencimento_proximos") === "on";
 
   if (temParcela && parcela !== null && (!Number.isInteger(parcela) || parcela < 1)) {
     return { erro: "Número da parcela inválido." };
@@ -34,6 +38,30 @@ export async function salvarLancamento(
 
   const pago = status === "pago";
   const supabase = await createClient();
+
+  // Vencimento: igual ao do cadastro -> não guarda nada (segue o cadastro).
+  // "Próximos meses" -> muda o dia no cadastro da conta.
+  const { data: atual, error: erroLeitura } = await supabase
+    .from("lancamentos")
+    .select("competencia, conta_id, contas!inner(dia_vencimento)")
+    .eq("id", id)
+    .single<{ competencia: string; conta_id: string; contas: { dia_vencimento: number | null } }>();
+  if (erroLeitura) return { erro: erroLeitura.message };
+
+  let diaCadastro = atual.contas.dia_vencimento;
+  if (vencimentoProximos && vencimentoInformado) {
+    diaCadastro = Number(vencimentoInformado.slice(8));
+    const { error: e2 } = await supabase
+      .from("contas")
+      .update({ dia_vencimento: diaCadastro })
+      .eq("id", atual.conta_id);
+    if (e2) return { erro: e2.message };
+  }
+  const vencimento =
+    vencimentoInformado && vencimentoInformado !== vencimentoPadrao(atual.competencia, diaCadastro)
+      ? vencimentoInformado
+      : null;
+
   const { error } = await supabase
     .from("lancamentos")
     .update({
@@ -42,6 +70,7 @@ export async function salvarLancamento(
       valor_pago: pago ? (valorPago ?? valorPrevisto) : null,
       data_pagamento: pago ? (dataPagamento ?? hoje()) : null,
       obs,
+      vencimento,
       ...(temParcela ? { parcela } : {}),
     })
     .eq("id", id);

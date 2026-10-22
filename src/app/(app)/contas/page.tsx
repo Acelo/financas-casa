@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { competenciaParaData, formatBRL, lerMes } from "@/lib/format";
+import { vencimentoEfetivo } from "@/lib/vencimento";
 import { AcoesMes } from "../_components/acoes-mes";
 import { MesNav, Resumo } from "../_components/mes-nav";
 import type { LancamentoView } from "../_components/lancamento-item";
@@ -12,15 +13,16 @@ export default async function ContasDoMes({ searchParams }: PageProps<"/contas">
   const { data, error } = await supabase
     .from("lancamentos")
     .select(
-      "id, valor_previsto, valor_pago, data_pagamento, status, parcela, obs, contas!inner(nome, categoria, dia_vencimento, parcelas_totais, recorrente)",
+      "id, valor_previsto, valor_pago, data_pagamento, status, competencia, vencimento, parcela, obs, contas!inner(nome, categoria, dia_vencimento, parcelas_totais, recorrente)",
     )
     .eq("competencia", competenciaParaData(mes))
     .returns<LancamentoView[]>();
 
+  // Ordena pelo vencimento do mês (o alterado, se houver); sem data, no fim
+  const venc = (l: LancamentoView) =>
+    vencimentoEfetivo(l.competencia, l.vencimento, l.contas.dia_vencimento) ?? "9999";
   const lancamentos = (data ?? []).sort(
-    (a, b) =>
-      (a.contas.dia_vencimento ?? 99) - (b.contas.dia_vencimento ?? 99) ||
-      a.contas.nome.localeCompare(b.contas.nome),
+    (a, b) => venc(a).localeCompare(venc(b)) || a.contas.nome.localeCompare(b.contas.nome),
   );
 
   const totalPrevisto = lancamentos.reduce((s, l) => s + Number(l.valor_previsto), 0);

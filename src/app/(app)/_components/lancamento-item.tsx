@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { formatBRL } from "@/lib/format";
 import { valorParaInput } from "@/lib/valores";
+import { rotuloVencimento, vencimentoEfetivo } from "@/lib/vencimento";
 import { CampoValor } from "./campo-valor";
 import {
   excluirLancamento,
@@ -17,6 +18,8 @@ export type LancamentoView = {
   valor_pago: number | null;
   data_pagamento: string | null;
   status: "pendente" | "pago";
+  competencia: string;
+  vencimento: string | null; // só quando mudou neste mês
   parcela: number | null;
   obs: string | null;
   contas: {
@@ -78,7 +81,8 @@ export function LancamentoItem({
           {/* A categoria já está no título do grupo */}
           <p className="text-xs text-muted">
             {[
-              l.contas.dia_vencimento && `dia ${l.contas.dia_vencimento}`,
+              rotuloVencimento(l.competencia, l.vencimento, l.contas.dia_vencimento),
+              l.vencimento && "só este mês",
               l.parcela && l.contas.parcelas_totais && `${l.parcela}/${l.contas.parcelas_totais}`,
               !l.contas.recorrente && "avulso",
             ]
@@ -136,6 +140,20 @@ export function LancamentoItem({
           <label className="space-y-1">
             <span className="text-xs text-muted">Data do pagamento</span>
             <input name="data_pagamento" type="date" defaultValue={l.data_pagamento ?? ""} className={campo} />
+          </label>
+          {/* Vencimento: muda só este mês, ou também o cadastro (próximos meses) */}
+          <label className="space-y-1">
+            <span className="text-xs text-muted">Vencimento</span>
+            <input
+              name="vencimento"
+              type="date"
+              defaultValue={vencimentoEfetivo(l.competencia, l.vencimento, l.contas.dia_vencimento) ?? ""}
+              className={campo}
+            />
+          </label>
+          <label className="flex items-center gap-2 self-end pb-2 text-sm">
+            <input type="checkbox" name="vencimento_proximos" />
+            Mudar também nos próximos meses
           </label>
           {/* Corrige a contagem: os meses seguintes continuam a partir daqui */}
           {l.contas.parcelas_totais && (
