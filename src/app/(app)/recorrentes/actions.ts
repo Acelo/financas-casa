@@ -30,7 +30,7 @@ export async function salvarConta(
     categoria,
     dia_vencimento: dia,
     forma_pagamento: String(formData.get("forma_pagamento") ?? "").trim() || null,
-    tipo_valor: formData.get("tipo_valor") === "variavel" ? "variavel" : "fixo",
+    tipo_valor: formData.get("variavel") === "on" ? "variavel" : "fixo",
     gera_lancamento: formData.get("gera_lancamento") === "on",
     ativo: formData.get("ativo") === "on",
     parcelas_totais: lerInteiro(formData.get("parcelas_totais")),

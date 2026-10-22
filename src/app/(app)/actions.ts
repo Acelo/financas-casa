@@ -47,10 +47,35 @@ export async function salvarLancamento(
   // "Próximos meses" -> muda o dia no cadastro da conta.
   const { data: atual, error: erroLeitura } = await supabase
     .from("lancamentos")
-    .select("competencia, conta_id, contas!inner(dia_vencimento)")
+    .select("competencia, conta_id, valor_previsto, valor_pago, valor_conferido, contas!inner(dia_vencimento, tipo_valor, origem_valor)")
     .eq("id", id)
-    .single<{ competencia: string; conta_id: string; contas: { dia_vencimento: number | null } }>();
+    .single<{
+      competencia: string;
+      conta_id: string;
+      valor_previsto: number;
+      valor_pago: number | null;
+      valor_conferido: boolean;
+      contas: { dia_vencimento: number | null; tipo_valor: string; origem_valor: string };
+    }>();
   if (erroLeitura) return { erro: erroLeitura.message };
+
+  // Checkbox "Valor variável" (só existe no formulário de contas manuais):
+  // muda o cadastro, vale para os próximos meses gerados
+  if (atual.contas.origem_valor === "manual") {
+    const tipo = formData.get("variavel") === "on" ? "variavel" : "fixo";
+    if (tipo !== atual.contas.tipo_valor) {
+      const { error: e3 } = await supabase.from("contas").update({ tipo_valor: tipo }).eq("id", atual.conta_id);
+      if (e3) return { erro: e3.message };
+    }
+  }
+
+  // Lembrete "valor ainda não editado" some quando o valor muda, quando a
+  // conta é paga ou quando o valor é confirmado como está
+  const valorMudou =
+    Number(atual.valor_previsto) !== valorPrevisto ||
+    (pago && valorPago !== null && Number(atual.valor_pago ?? NaN) !== valorPago);
+  const conferido =
+    atual.valor_conferido || valorMudou || pago || formData.get("confirmar_valor") === "on";
 
   let diaCadastro = atual.contas.dia_vencimento;
   if (vencimentoProximos && diaInformado !== diaCadastro) {
@@ -76,6 +101,7 @@ export async function salvarLancamento(
       data_pagamento: pago ? (dataPagamento ?? hoje()) : null,
       obs,
       vencimento,
+      valor_conferido: conferido,
       ...(temParcela ? { parcela } : {}),
     })
     .eq("id", id)
@@ -107,6 +133,8 @@ export async function marcarPago(id: string) {
       status: "pago",
       valor_pago: atual.valor_previsto,
       data_pagamento: hoje(),
+      // Pagou: a conta chegou e o valor foi aceito
+      valor_conferido: true,
     })
     .eq("id", id);
 

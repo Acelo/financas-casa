@@ -13,7 +13,7 @@ export default async function ContasDoMes({ searchParams }: PageProps<"/contas">
   const { data, error } = await supabase
     .from("lancamentos")
     .select(
-      "id, valor_previsto, valor_pago, data_pagamento, status, competencia, vencimento, parcela, obs, contas!inner(nome, categoria, dia_vencimento, parcelas_totais, recorrente)",
+      "id, valor_previsto, valor_pago, data_pagamento, status, competencia, vencimento, parcela, obs, valor_conferido, contas!inner(nome, categoria, dia_vencimento, parcelas_totais, recorrente, tipo_valor, origem_valor)",
     )
     .eq("competencia", competenciaParaData(mes))
     .returns<LancamentoView[]>();

@@ -244,12 +244,13 @@ function FormConta({ conta, aoTerminar }: { conta?: ContaView; aoTerminar: () =>
         <span className="text-xs text-muted">Dia de vencimento</span>
         <input name="dia_vencimento" inputMode="numeric" defaultValue={conta?.dia_vencimento ?? ""} className={campo} />
       </label>
-      <label className="space-y-1">
-        <span className="text-xs text-muted">Valor é</span>
-        <select name="tipo_valor" defaultValue={conta?.tipo_valor ?? "fixo"} className={campo}>
-          <option value="fixo">Fixo</option>
-          <option value="variavel">Variável</option>
-        </select>
+      {/* Variável: cada mês gerado vem com o lembrete "valor ainda não editado" */}
+      <label className="flex items-start gap-2 self-end pb-2 text-sm">
+        <input type="checkbox" name="variavel" defaultChecked={conta?.tipo_valor === "variavel"} className="mt-1" />
+        <span>
+          Valor variável
+          <span className="block text-xs text-muted">Lembrar de atualizar todo mês</span>
+        </span>
       </label>
       <label className="space-y-1">
         <span className="text-xs text-muted">Total de parcelas</span>

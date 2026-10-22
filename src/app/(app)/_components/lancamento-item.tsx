@@ -22,14 +22,31 @@ export type LancamentoView = {
   vencimento: string | null; // só quando mudou neste mês
   parcela: number | null;
   obs: string | null;
+  // false = previsto ainda é a estimativa do mês anterior (lembrete)
+  valor_conferido: boolean;
   contas: {
     nome: string;
     categoria: string;
     dia_vencimento: number | null;
     parcelas_totais: number | null;
     recorrente: boolean;
+    tipo_valor: "fixo" | "variavel";
+    origem_valor: "manual" | "juros_obra";
   };
 };
+
+// Lembrete discreto: o valor ainda não foi conferido neste mês
+function IconeNaoEditado() {
+  return (
+    <span title="Valor ainda não editado" className="inline-flex shrink-0 text-accent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="size-3.5">
+        <path d="M12 20h9" />
+        <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" />
+      </svg>
+      <span className="sr-only">Valor ainda não editado</span>
+    </span>
+  );
+}
 
 const campo =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-base outline-none focus:border-accent";
@@ -80,7 +97,10 @@ export function LancamentoItem({
           onClick={() => (selecao.ativo ? selecao.alternar() : setAberto((a) => !a))}
           className="min-w-0 flex-1 text-left"
         >
-          <p className="truncate font-medium">{l.contas.nome}</p>
+          <p className="flex items-center gap-1.5 font-medium">
+            <span className="truncate">{l.contas.nome}</span>
+            {!l.valor_conferido && <IconeNaoEditado />}
+          </p>
           {/* A categoria já está no título do grupo */}
           <p className="text-xs text-muted">
             {[
@@ -124,6 +144,19 @@ export function LancamentoItem({
       {aberto && !selecao.ativo && (
         <form action={action} className="grid gap-3 border-t border-border bg-background/60 px-4 py-4 sm:grid-cols-2">
           <input type="hidden" name="id" value={l.id} />
+          {!l.valor_conferido && (
+            <div className="space-y-1 sm:col-span-2">
+              <p className="flex items-center gap-1.5 text-xs text-accent">
+                <IconeNaoEditado />
+                Valor ainda é o do mês anterior. Ajuste quando a conta chegar e salve.
+              </p>
+              {/* Para quando a conta veio com o mesmo valor do mês passado */}
+              <label className="flex items-center gap-2 text-xs text-muted">
+                <input type="checkbox" name="confirmar_valor" />
+                O valor está certo, só confirmar
+              </label>
+            </div>
+          )}
 
           <label className="space-y-1">
             <span className="text-xs text-muted">Valor previsto</span>
@@ -162,6 +195,17 @@ export function LancamentoItem({
             <input type="checkbox" name="vencimento_proximos" />
             Mudar também nos próximos meses
           </label>
+          {/* Variável = todo mês nasce com o lembrete "valor ainda não editado".
+              O Apartamento fica de fora: o valor vem sozinho dos juros de obra */}
+          {l.contas.origem_valor === "manual" && (
+            <label className="flex items-start gap-2 text-sm sm:col-span-2">
+              <input type="checkbox" name="variavel" defaultChecked={l.contas.tipo_valor === "variavel"} className="mt-1" />
+              <span>
+                Valor variável
+                <span className="block text-xs text-muted">Nos próximos meses, lembrar de atualizar o valor</span>
+              </span>
+            </label>
+          )}
           {/* Corrige a contagem: os meses seguintes continuam a partir daqui */}
           {l.contas.parcelas_totais && (
             <label className="space-y-1">

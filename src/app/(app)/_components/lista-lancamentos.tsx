@@ -90,6 +90,7 @@ export function ListaLancamentos({ lancamentos }: { lancamentos: LancamentoView[
       {grupos.map(([categoria, itens]) => {
         const subtotal = itens.reduce((s, l) => s + Number(l.valor_pago ?? l.valor_previsto), 0);
         const pendentes = itens.filter((l) => l.status === "pendente").length;
+        const aConferir = itens.filter((l) => !l.valor_conferido).length;
         const idsGrupo = itens.map((l) => l.id);
         const grupoTodo = idsGrupo.every((id) => marcados.has(id));
         return (
@@ -115,6 +116,7 @@ export function ListaLancamentos({ lancamentos }: { lancamentos: LancamentoView[
               <span className="text-xs text-muted">
                 {itens.length}
                 {pendentes > 0 && ` · ${pendentes} pendente${pendentes > 1 ? "s" : ""}`}
+                {aConferir > 0 && ` · ${aConferir} a conferir`}
               </span>
               <span className="ml-auto text-sm tabular-nums text-muted">{formatBRL(subtotal)}</span>
             </div>
