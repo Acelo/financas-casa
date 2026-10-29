@@ -1,0 +1,37 @@
+# Mantém o projeto da Supabase ativo.
+# No plano gratuito, a Supabase pausa projetos sem atividade por 7 dias. O Koda
+# é usado em rajadas (mais no começo do mês), então pode ficar dias parado.
+# Esta tarefa faz, uma vez por dia, duas consultas leves à API da Supabase:
+# não lê dados (sem login, as regras de acesso devolvem lista vazia), só
+# registra atividade. A chave usada é a "publishable", que já é pública (é a
+# mesma que vai no app).
+
+name: Manter Supabase ativo
+
+on:
+  schedule:
+    - cron: "17 11 * * *" # todo dia, 08:17 em Brasília
+  workflow_dispatch: # botão "Run workflow" para testar na hora
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_URL: https://ptswuovilfnurfvuieji.supabase.co
+      SUPABASE_KEY: sb_publishable_w2pLpmgFRufC5yV5Lp3kIQ_YPOwNwnS
+    steps:
+      - name: Consultar a API
+        run: |
+          api=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPABASE_KEY" \
+            "$SUPABASE_URL/rest/v1/backups?select=id&limit=1")
+          auth=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPABASE_KEY" \
+            "$SUPABASE_URL/auth/v1/health")
+          echo "API de dados: HTTP $api · Autenticação: HTTP $auth"
+          # 000 = não conectou; 5xx = Supabase fora do ar ou projeto pausado
+          if [ "$api" = "000" ] || [ "${api:0:1}" = "5" ]; then
+            echo "::error::A Supabase não respondeu (HTTP $api). Confira se o projeto foi pausado."
+            exit 1
+          fi
