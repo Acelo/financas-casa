@@ -158,6 +158,12 @@ export function estimar(
       irBase += Math.max(0, Number(m.valor)) * 0.225;
     }
   }
+  // O líquido informado vale para o saldo do FIM do dia da âncora. Dentro de
+  // um mesmo dia a ordem das movimentações não é garantida (ex.: aporte e
+  // "Atualizar saldo" no mesmo dia), então recalcula com o saldo do dia todo.
+  if (ancora.valor_liquido != null) {
+    irBase = Math.max(0, bal - Number(ancora.valor_liquido));
+  }
 
   // O saldo da âncora vira o primeiro lote; cada aporte depois dela, outro.
   // A idade real do dinheiro antigo não é conhecida: o IR do ganho novo sobre
